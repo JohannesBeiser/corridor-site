@@ -3,42 +3,331 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Corridor</title>
+<title>Corridor — offline maps for thru-hikers</title>
+<meta name="description" content="The map and the elevation profile on one screen, and every trail's whole topographic map on your phone. Te Araroa, the Great Divide Trail and the Pacific Crest Trail. Free, no account, works in airplane mode.">
+<link rel="icon" href="favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#FBFAF7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#101314" media="(prefers-color-scheme: dark)">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://corridor-trails.com/">
+<meta property="og:title" content="Corridor — offline maps for thru-hikers">
+<meta property="og:description" content="Map and elevation profile on one screen. Every trail's whole topographic map, offline. Free.">
+<meta property="og:image" content="https://corridor-trails.com/img/one-screen.webp">
+<meta name="twitter:card" content="summary_large_image">
 <style>
-  :root { --ink:#1C1F21; --faint:#6B7276; --paper:#FBFAF7; --you:#B0384A; }
+  :root {
+    --paper:#FBFAF7; --card:#FFFFFF; --ink:#1C1F21; --faint:#6B7276; --hair:#DBD8D2;
+    --you:#B0384A; --water:#2F6F92; --shelter:#8A5A34; --town:#9B3A6B; --info:#6A3FA0;
+    --wash:#F2EFE9;
+    --shadow:0 2px 6px rgba(28,31,33,.05), 0 18px 50px rgba(28,31,33,.13);
+  }
   @media (prefers-color-scheme: dark) {
-    :root { --ink:#E6E8E9; --faint:#9AA1A5; --paper:#101314; --you:#D4697A; }
+    :root {
+      --paper:#101314; --card:#171B1D; --ink:#E6E8E9; --faint:#9AA1A5; --hair:#2C3235;
+      --you:#D4697A; --water:#6FA6C4; --shelter:#BE8F63; --town:#C87BA2; --info:#A585D6;
+      --wash:#1B2023;
+      --shadow:0 2px 6px rgba(0,0,0,.5), 0 18px 50px rgba(0,0,0,.55);
+    }
   }
-  html { background: var(--paper); }
+
+  * { box-sizing:border-box; }
+  html { background:var(--paper); scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
   body {
-    font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif;
-    color: var(--ink); background: var(--paper);
-    max-width: 40rem; margin: 0 auto; padding: 4rem 1.25rem 5rem;
-    line-height: 1.6; font-size: 17px;
+    margin:0; padding:0;
+    background:var(--paper); color:var(--ink);
+    font-family:"Avenir Next","Avenir",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-size:17px; line-height:1.6; -webkit-font-smoothing:antialiased;
   }
-  h1 { font-size: 2rem; margin: 0 0 .25rem; letter-spacing: -0.01em; }
-  .sub { color: var(--faint); margin: 0 0 2.5rem; font-size: 1rem; }
-  p { margin: 0 0 1rem; }
-  ul { list-style: none; padding: 0; margin: 2.5rem 0 0; }
-  li { margin-bottom: .6rem; }
-  a { color: var(--you); }
+  .wrap { max-width:62rem; margin:0 auto; padding:0 1.5rem; }
+  .narrow { max-width:38rem; }
+  a { color:var(--you); text-decoration:none; }
+  a:hover { text-decoration:underline; }
+  :focus-visible { outline:2px solid var(--you); outline-offset:3px; border-radius:3px; }
+
+  /* ---- hero ---- */
+  header.hero { padding:5.5rem 0 4rem; text-align:center; }
+  .icon {
+    width:96px; height:96px; border-radius:22px; display:block; margin:0 auto 1.6rem;
+    border:1px solid var(--hair); box-shadow:var(--shadow);
+  }
+  h1 {
+    font-size:clamp(2.6rem,8vw,4rem); font-weight:600; letter-spacing:-.028em;
+    line-height:1; margin:0 0 .5rem;
+  }
+  .tagline { font-size:clamp(1.05rem,3vw,1.3rem); color:var(--faint); margin:0 0 1.8rem; }
+  .lede {
+    max-width:34rem; margin:0 auto 2.4rem; font-size:1.08rem; text-wrap:pretty;
+  }
+
+  .cta { display:inline-flex; align-items:center; gap:.6rem;
+         background:var(--you); color:var(--paper); font-weight:600; font-size:1.05rem;
+         padding:.85rem 2rem; border-radius:100px; letter-spacing:-.005em;
+         box-shadow:0 2px 10px rgba(176,56,74,.28); transition:transform .12s ease; }
+  .cta:hover { text-decoration:none; transform:translateY(-1px); }
+  .cta svg { width:19px; height:19px; fill:currentColor; }
+  .cta-note { display:block; margin-top:.85rem; font-size:.86rem; color:var(--faint); }
+
+  /* ---- facts ---- */
+  .facts {
+    display:flex; flex-wrap:wrap; justify-content:center; gap:.6rem 1.4rem;
+    margin:3.5rem auto 0; padding:1.3rem 0; max-width:46rem;
+    border-top:1px solid var(--hair); border-bottom:1px solid var(--hair);
+    font-size:.9rem; color:var(--faint);
+  }
+  .facts b { color:var(--ink); font-weight:600; }
+
+  /* ---- features ---- */
+  section.feature { padding:4.5rem 0; border-bottom:1px solid var(--hair); }
+  .feature .wrap {
+    display:grid; gap:2.5rem 4rem; align-items:center;
+    grid-template-columns:1fr;
+  }
+  @media (min-width:52rem) {
+    .feature .wrap { grid-template-columns:minmax(0,1fr) minmax(0,1.05fr); gap:2rem 5rem; }
+    .feature:nth-of-type(even) .shot { order:2; }
+  }
+  .shot { display:flex; justify-content:center; }
+  .shot img {
+    display:block; width:100%; max-width:310px; height:auto;
+    filter:drop-shadow(0 3px 8px rgba(28,31,33,.10)) drop-shadow(0 22px 44px rgba(28,31,33,.20));
+    -webkit-mask-image:linear-gradient(to bottom, #000 88%, transparent 100%);
+    mask-image:linear-gradient(to bottom, #000 88%, transparent 100%);
+  }
+  @media (prefers-color-scheme: dark) {
+    .shot img { filter:drop-shadow(0 3px 8px rgba(0,0,0,.5)) drop-shadow(0 22px 44px rgba(0,0,0,.6)); }
+  }
+  .eyebrow {
+    font-size:.78rem; font-weight:600; letter-spacing:.09em; text-transform:uppercase;
+    color:var(--faint); margin:0 0 .7rem;
+  }
+  h2 {
+    font-size:clamp(1.6rem,4.5vw,2.15rem); font-weight:600; letter-spacing:-.02em;
+    line-height:1.12; margin:0 0 .9rem; text-wrap:balance;
+  }
+  .words p { margin:0 0 1rem; text-wrap:pretty; }
+  .words p:last-child { margin-bottom:0; }
+
+  /* ---- plain sections ---- */
+  section.plain { padding:5rem 0; border-bottom:1px solid var(--hair); }
+  section.plain h2 { text-align:center; }
+  .answers { list-style:none; padding:0; margin:2.5rem auto 0; max-width:44rem;
+             display:grid; gap:0; }
+  .answers li { padding:1.05rem 0; border-bottom:1px solid var(--hair); text-wrap:pretty; }
+  .answers li:first-child { border-top:1px solid var(--hair); }
+  .answers b { font-weight:600; }
+
+  .trails { display:grid; gap:1rem; margin:2.5rem auto 0; max-width:44rem;
+            grid-template-columns:1fr; }
+  @media (min-width:44rem) { .trails { grid-template-columns:repeat(3,1fr); } }
+  .trail { background:var(--wash); border:1px solid var(--hair); border-radius:14px;
+           padding:1.15rem 1.25rem; }
+  .trail .name { font-weight:600; letter-spacing:-.012em; }
+  .trail .num { font-size:.88rem; color:var(--faint); margin-top:.2rem; }
+
+  /* ---- note ---- */
+  .note { max-width:36rem; margin:0 auto; }
+  section.plain .note h2 { text-align:left; }
+  .note .sig { color:var(--faint); font-size:.95rem; margin-top:1.4rem; }
+
+  /* ---- closing ---- */
+  section.closing { padding:5.5rem 0 4rem; text-align:center; }
+  section.closing h2 { margin-bottom:1.4rem; }
+
+  footer { padding:2.5rem 0 4rem; text-align:center; color:var(--faint); font-size:.9rem; }
+  footer nav { display:flex; flex-wrap:wrap; justify-content:center; gap:.6rem 1.5rem;
+               margin-bottom:1.2rem; }
+  footer .fine { max-width:32rem; margin:0 auto; }
 </style>
 </head>
 <body>
 
-<h1>Corridor</h1>
-<p class="sub">A thru-hiking app for one hiker, one trail at a time.</p>
+<header class="hero">
+  <div class="wrap">
+    <img class="icon" src="img/icon.webp" width="96" height="96" alt="The Corridor app icon: a trail line through a corridor of ground, with a red dot on it.">
+    <h1>Corridor</h1>
+    <p class="tagline">Offline maps for thru-hikers</p>
+    <p class="lede">The map and the elevation profile on one screen, and the whole trail's
+    topography on your phone. Made by a thru-hiker for the walk he's on.</p>
 
-<p>Te Araroa, the Great Divide Trail and the Pacific Crest Trail, drawn as a corridor along the
-line you are walking. The whole trail's topographic map lives on your phone, so it works with
-no signal at all.</p>
+    <a class="cta" href="https://apps.apple.com/app/id6801537739">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.05 12.54c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.72-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.87-.76-1.48.02-2.84.86-3.6 2.18-1.53 2.66-.39 6.6 1.1 8.76.73 1.06 1.6 2.25 2.74 2.2 1.1-.04 1.51-.71 2.84-.71 1.32 0 1.7.71 2.86.69 1.18-.02 1.93-1.08 2.65-2.14.84-1.23 1.18-2.42 1.2-2.48-.03-.01-2.29-.88-2.31-3.5zM14.9 5.9c.6-.74 1.01-1.76.9-2.78-.87.04-1.93.58-2.56 1.31-.56.65-1.06 1.69-.93 2.69.97.07 1.97-.49 2.59-1.22z"/></svg>
+      Download on the App Store
+    </a>
+    <span class="cta-note">Free · iPhone · iOS 26 and up · no account, no subscription</span>
 
-<p>No server, no account, nothing collected.</p>
+    <p class="facts">
+      <span><b>3</b> trails</span>
+      <span><b>8 223 km</b> of line</span>
+      <span><b>Works in airplane mode</b></span>
+      <span><b>Nothing collected</b></span>
+    </p>
+  </div>
+</header>
 
-<ul>
-  <li><a href="support.html">Support</a></li>
-  <li><a href="privacy.html">Privacy policy</a></li>
-</ul>
+<section class="feature">
+  <div class="wrap">
+    <div class="shot">
+      <img src="img/one-screen.webp" width="720" height="1549" loading="eager"
+           alt="The day screen: next water 0.9 km, next shelter 8.1 km, next town 36.3 km, over a topographic map with the elevation profile beneath it.">
+    </div>
+    <div class="words">
+      <p class="eyebrow">The day</p>
+      <h2>Everything on one screen.</h2>
+      <p>The map and the elevation profile sit together and stay in sync. The map is a
+      corridor along the trail — up is ahead, down is behind — and it turns as you scroll so
+      the line always points up. You see the most trail a screen can hold.</p>
+      <p>Above it, the three numbers you actually want: how far to the next water, the next
+      place to sleep, the next town.</p>
+    </div>
+  </div>
+</section>
+
+<section class="feature">
+  <div class="wrap">
+    <div class="shot">
+      <img src="img/free.webp" width="720" height="1584" loading="lazy"
+           alt="Te Araroa's trail page: 2 986 km, 10 alternates, October to April, with the registration and permit rules written out.">
+    </div>
+    <div class="words">
+      <p class="eyebrow">Before you go</p>
+      <h2>Every trail. Free.</h2>
+      <p>No account, no subscription, nothing to unlock. Every trail, every map.</p>
+      <p>Each one opens on its own page: the season, the two directions' start windows, and
+      what the trail asks of you before you start — registration, permits, the crossings that
+      are boats. Every claim carries a link to the authority it came from.</p>
+    </div>
+  </div>
+</section>
+
+<section class="feature">
+  <div class="wrap">
+    <div class="shot">
+      <img src="img/alternates.webp" width="720" height="1549" loading="lazy"
+           alt="The alternates list on the Great Divide Trail, each row showing what it adds in distance and climb.">
+    </div>
+    <div class="words">
+      <p class="eyebrow">Alternates</p>
+      <h2>Take any alternate.</h2>
+      <p>Every row shows the two numbers you decide on — what it costs you in distance and in
+      climb. Switch one on and the whole trail re-routes through it: the distance, the climb
+      and the elevation profile all follow.</p>
+      <p>And you can draw your own. Tap along any track on the map and it is measured
+      correctly, kept, and treated like any other alternate from then on.</p>
+    </div>
+  </div>
+</section>
+
+<section class="feature">
+  <div class="wrap">
+    <div class="shot">
+      <img src="img/sections.webp" width="720" height="1088" loading="lazy"
+           alt="A planned section: 54.1 km, 2 081 m of climb, 5 nights, a 28.4 km longest dry stretch, and a note about Parks Canada reservations.">
+    </div>
+    <div class="words">
+      <p class="eyebrow">Planning</p>
+      <h2>Plan the next sections.</h2>
+      <p>Pick where you are stopping and the section tells you what it costs: the distance,
+      the climb, how many nights, and the longest dry stretch — counting only reliable water,
+      and again counting every source the map has.</p>
+      <p>Then it says what is worth knowing before you walk in. Permits, river crossings,
+      seasonal closures, long water carries.</p>
+    </div>
+  </div>
+</section>
+
+<section class="feature">
+  <div class="wrap">
+    <div class="shot">
+      <img src="img/three-d.webp" width="720" height="1584" loading="lazy"
+           alt="A circle of country drawn in three dimensions, with the trail and your own position on it, and the lowest, highest and steepest figures beneath.">
+    </div>
+    <div class="words">
+      <p class="eyebrow">The ground</p>
+      <h2>Look at any place in 3D.</h2>
+      <p>Draw a circle anywhere on the map and see that piece of country in three dimensions,
+      with the trail and your own position on it.</p>
+      <p>Lowest, highest, steepest — for the hillside you are about to be standing on.</p>
+    </div>
+  </div>
+</section>
+
+<section class="plain">
+  <div class="wrap">
+    <h2>What it answers</h2>
+    <ul class="answers">
+      <li><b>How far to the next water</b>, the next place to sleep, the next town.</li>
+      <li><b>What's worth knowing before the next section</b> — permits, river crossings,
+      seasonal closures, long water carries.</li>
+      <li><b>How far you've walked today</b> and what's left to where you're stopping.</li>
+      <li><b>What an alternate costs you</b>, before you commit to it.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="plain">
+  <div class="wrap">
+    <h2>It works with no signal at all</h2>
+    <div class="narrow" style="margin:1.4rem auto 0; text-align:center;">
+      <p>A trail's whole topographic map downloads once and works with the phone in airplane
+      mode. No signal, no server, no account. Contours, hillshading, ground cover, huts,
+      water, towns and the roads you walk in on.</p>
+    </div>
+    <div class="trails">
+      <div class="trail">
+        <div class="name">Te Araroa</div>
+        <div class="num">New Zealand · 2 986 km</div>
+      </div>
+      <div class="trail">
+        <div class="name">Great Divide Trail</div>
+        <div class="num">Canada · 1 084 km</div>
+      </div>
+      <div class="trail">
+        <div class="name">Pacific Crest Trail</div>
+        <div class="num">United States · 4 153 km</div>
+      </div>
+    </div>
+    <p style="text-align:center; color:var(--faint); font-size:.9rem; margin-top:1.2rem;">
+      More are being added.</p>
+  </div>
+</section>
+
+<section class="plain">
+  <div class="wrap note">
+    <h2>A note on the data</h2>
+    <p>Every waypoint comes from the trail's own association or from open data. I can't
+    hand-verify all of them, and no water source is truly reliable until someone who was there
+    says so. If you're out and something's wrong,
+    <a href="mailto:beiserjohannes@gmail.com">tell me</a> and I'll fix it.</p>
+    <p>Corridor is a planning and navigation aid, not a substitute for a paper map, a compass,
+    or the trail organisation's own current notices.</p>
+    <p class="sig">— Pez, who walked the CDT, the PCT, the GDT and Te Araroa, and built this
+    because he wanted one app that answered the questions he actually had out there.</p>
+  </div>
+</section>
+
+<section class="closing">
+  <div class="wrap">
+    <h2>Get it on your phone</h2>
+    <a class="cta" href="https://apps.apple.com/app/id6801537739">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.05 12.54c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.72-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.87-.76-1.48.02-2.84.86-3.6 2.18-1.53 2.66-.39 6.6 1.1 8.76.73 1.06 1.6 2.25 2.74 2.2 1.1-.04 1.51-.71 2.84-.71 1.32 0 1.7.71 2.86.69 1.18-.02 1.93-1.08 2.65-2.14.84-1.23 1.18-2.42 1.2-2.48-.03-.01-2.29-.88-2.31-3.5zM14.9 5.9c.6-.74 1.01-1.76.9-2.78-.87.04-1.93.58-2.56 1.31-.56.65-1.06 1.69-.93 2.69.97.07 1.97-.49 2.59-1.22z"/></svg>
+      Download on the App Store
+    </a>
+    <span class="cta-note">Free · iPhone · iOS 26 and up</span>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <nav>
+      <a href="support.html">Support</a>
+      <a href="privacy.html">Privacy policy</a>
+      <a href="mailto:beiserjohannes@gmail.com">beiserjohannes@gmail.com</a>
+    </nav>
+    <p class="fine">No server, no account, nothing collected. Map data from
+    OpenStreetMap contributors and each trail's own association.</p>
+  </div>
+</footer>
 
 </body>
 </html>
