@@ -323,6 +323,7 @@
   var film = document.getElementById('film');
   var panelHost = document.getElementById('panels');
   var tickHost = document.getElementById('ticks');
+  var tourText = document.querySelector('.tour-text');
   var data = JSON.parse(document.getElementById('demo-timeline').textContent);
   var beats = (data.beats || []).filter(function (b) { return b.title; });
   if (!film || !beats.length) { return; }
@@ -382,7 +383,11 @@
 
   // Each panel's own height, measured rather than guessed, and re-measured on resize: the same
   // words are two lines at one width and four at another. The block tracks whichever panel is
-  // showing rather than the tallest of them, so the controls sit right under the text.
+  // showing rather than the tallest of them, so the controls sit right under the text — but
+  // whatever is below the whole film section must not itself move when a taller beat comes on
+  // screen, or scrolling to the last (tallest, image-carrying) beat shifts everything under it
+  // while somebody is reading down there. So the column reserves the tallest beat's own total
+  // height as a floor, and the shorter beats just leave quiet space under the controls instead.
   var showing = -1;
   var panelHeights = [];
   function fit() {
@@ -394,6 +399,12 @@
       el.style.position = was;
       return h;
     });
+    if (tourText) {
+      tourText.style.minHeight = '0';
+      var tallest = Math.max.apply(Math, panelHeights.concat(0));
+      panelHost.style.height = tallest + 'px';
+      tourText.style.minHeight = tourText.offsetHeight + 'px';
+    }
     panelHost.style.height = (panelHeights[showing] != null ? panelHeights[showing] : panelHeights[0] || 0) + 'px';
   }
   fit();
