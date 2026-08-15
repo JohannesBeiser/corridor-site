@@ -66,12 +66,14 @@
   .cta-note { display:block; margin-top:.85rem; font-size:.86rem; color:var(--faint); }
 
   .facts {
-    display:flex; flex-wrap:wrap; justify-content:center; gap:.6rem 1.4rem;
+    display:flex; flex-wrap:wrap; justify-content:center; gap:.6rem 0;
     margin:3rem auto 0; padding:1.2rem 0; max-width:46rem;
     border-top:1px solid var(--hair); border-bottom:1px solid var(--hair);
     font-size:.9rem; color:var(--faint);
   }
   .facts b { color:var(--ink); font-weight:600; }
+  .facts span::after { content:"·"; margin:0 .7rem; opacity:.5; }
+  .facts span:last-child::after { content:""; margin:0; }
 
   /* ---- the film ---- */
   section.film { padding:4rem 0 5rem; border-bottom:1px solid var(--hair); }
@@ -198,12 +200,13 @@
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.05 12.54c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.72-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.87-.76-1.48.02-2.84.86-3.6 2.18-1.53 2.66-.39 6.6 1.1 8.76.73 1.06 1.6 2.25 2.74 2.2 1.1-.04 1.51-.71 2.84-.71 1.32 0 1.7.71 2.86.69 1.18-.02 1.93-1.08 2.65-2.14.84-1.23 1.18-2.42 1.2-2.48-.03-.01-2.29-.88-2.31-3.5zM14.9 5.9c.6-.74 1.01-1.76.9-2.78-.87.04-1.93.58-2.56 1.31-.56.65-1.06 1.69-.93 2.69.97.07 1.97-.49 2.59-1.22z"/></svg>
       Download on the App Store
     </a>
-    <span class="cta-note">Free · iPhone · iOS 26 and up · no account, no subscription</span>
+    <span class="cta-note">Free · iPhone · iOS 18 and up · no account, no subscription</span>
 
     <p class="facts">
       <span><b>Offline and free</b></span>
       <span><b>Section guide</b></span>
       <span><b>Everything important in one view</b></span>
+      <span><b>Easy water reports</b></span>
     </p>
   </div>
 </header>
@@ -236,6 +239,8 @@
     <h2>Questions we have on trail</h2>
     <ul class="answers">
       <li><b>How far to the next water</b>, the next place to sleep, the next town.</li>
+      <li><b>How far to the next water, and how reliable it is right now</b> — hikers' own
+      reports, not just a mapper's guess.</li>
       <li><b>What's worth knowing before the next section</b> — permits, river crossings,
       seasonal closures, long water carries.</li>
       <li><b>How far you've walked today</b> and what's left to where you're stopping.</li>
@@ -251,7 +256,7 @@
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.05 12.54c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.72-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.87-.76-1.48.02-2.84.86-3.6 2.18-1.53 2.66-.39 6.6 1.1 8.76.73 1.06 1.6 2.25 2.74 2.2 1.1-.04 1.51-.71 2.84-.71 1.32 0 1.7.71 2.86.69 1.18-.02 1.93-1.08 2.65-2.14.84-1.23 1.18-2.42 1.2-2.48-.03-.01-2.29-.88-2.31-3.5zM14.9 5.9c.6-.74 1.01-1.76.9-2.78-.87.04-1.93.58-2.56 1.31-.56.65-1.06 1.69-.93 2.69.97.07 1.97-.49 2.59-1.22z"/></svg>
       Download on the App Store
     </a>
-    <span class="cta-note">Free · iPhone · iOS 26 and up</span>
+    <span class="cta-note">Free · iPhone · iOS 18 and up</span>
   </div>
 </section>
 
