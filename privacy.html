@@ -33,11 +33,35 @@
 <p class="back"><a href="./">← Corridor</a></p>
 
 <h1>Privacy Policy</h1>
-<p class="sub">Corridor · last updated 14 August 2026</p>
+<p class="sub">Corridor · last updated 15 August 2026</p>
 
-<p><strong>Corridor collects nothing.</strong> There is no server, no account, no sign-in and
-no analytics. Nothing you do in the app is sent anywhere, and there is nowhere for it to be
-sent to.</p>
+<p><strong>There is no account, no sign-in, no analytics, and no server running code I wrote.</strong>
+Almost everything the app knows about you stays on your phone: where you are, where you have
+walked, where you slept, what you have planned. None of it is ever sent anywhere.</p>
+
+<p><strong>One thing you can choose to share: a comment about a place.</strong> If you write
+one, it goes to Apple&rsquo;s iCloud so other hikers can read it. That is the only thing this
+app ever sends, and only when you type it and press Post.</p>
+
+<h2>Comments</h2>
+<p>Every waypoint has a place to write a note for the next hiker &mdash; the tank is dry, the
+door sticks, the creek below is running. Writing one is entirely optional and the app is
+complete without it.</p>
+<p>If you write one, these things are stored in Apple&rsquo;s iCloud and are <strong>public</strong>:
+what you wrote, when you wrote it, which place it is about, and the trail name you chose if you
+chose one. Your comment is signed <em>anonymous</em> if you did not.</p>
+<p><strong>I never learn who you are.</strong> There is no sign-up and nothing to fill in. iCloud
+identifies you to the app by an opaque code that is different for every app you use and cannot be
+turned back into a person &mdash; not by me and not by anyone else. I never receive your name,
+your email address, your phone number or your Apple Account.</p>
+<p>You can delete any comment you have written, at any time, from the place it is about. You can
+delete <em>all</em> of them at once in Settings. You can hide any other hiker&rsquo;s comments by
+blocking them, and report anything that should not be there &mdash; three reports remove a comment
+from every phone.</p>
+<p>Everything you write is checked on your own phone before it is sent, by Apple&rsquo;s on-device
+model. That check happens on the phone and the text is not sent anywhere to perform it.</p>
+<p>If you never write a comment, nothing about you is stored in iCloud by this app at all.
+Reading what other people wrote sends nothing.</p>
 
 <h2>Your location</h2>
 <p>The app asks for your location so it can show where you are on the trail, measure how far
@@ -52,31 +76,45 @@ works; it simply cannot draw where you are.</p>
   <li>Your journey — the days you walked, where you slept, your destination.</li>
   <li>Your preferences — which trail, which map layers, which direction.</li>
   <li>Any route you drew yourself.</li>
+  <li>Any comment you have written and not yet sent, and a copy of the comments last fetched for
+      the places you have looked at.</li>
+  <li>The hikers you have blocked, as opaque codes.</li>
   <li>The downloaded map for each trail.</li>
 </ul>
 <p>All of it lives inside the app's own storage and is deleted when you delete the app.</p>
 
 <h2>Network use</h2>
-<p>The app itself makes no network requests. The one thing that crosses the network is the
-map for a trail, which you choose to download: iOS fetches it from Apple's own servers using
-Apple's Background Assets framework. I do not operate that server and I receive no
-information about who downloads what.</p>
+<p>Two things cross the network, to two different places.</p>
+<ul>
+  <li><strong>The map for a trail</strong>, which you choose to download. It comes from a plain
+      file bucket on Cloudflare R2 rather than from Apple &mdash; the app asks for a file by name
+      and is handed it back. Nothing in the app records who downloaded which trail; the request
+      itself is the same one anyone would send for a public file, and I have built nothing that
+      logs, counts or connects it to a person.</li>
+  <li><strong>Comments</strong>, through Apple&rsquo;s CloudKit. Reading them sends nothing about
+      you. Writing one sends what is listed under <em>Comments</em> above.</li>
+</ul>
+<p>Apple&rsquo;s own handling of iCloud data is covered by
+<a href="https://www.apple.com/legal/privacy/">Apple&rsquo;s privacy policy</a>, and Cloudflare&rsquo;s
+by <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare&rsquo;s</a>.</p>
 
 <h2>Third parties</h2>
 <p>There are none. No advertising, no tracking, no crash reporting, no third-party SDKs of
 any kind.</p>
 
 <h2>Children</h2>
-<p>Because nothing is collected, nothing is collected from children either.</p>
+<p>Corridor is rated 13+ because it lets hikers write notes other hikers can read. Nothing about
+you is collected unless you write one.</p>
 
 <h2>Changes</h2>
 <p>If this policy ever changes, the date at the top of this page changes with it.</p>
 
 <h2>Contact</h2>
-<p>Questions about privacy: <a href="mailto:beiserjohannes@gmail.com">beiserjohannes@gmail.com</a></p>
+<p>Questions about privacy, or something in a comment that should not be there: <a href="mailto:beiserjohannes@gmail.com">beiserjohannes@gmail.com</a></p>
 
 <hr>
-<footer>Corridor is made by one person for hikers. It is offline by design.</footer>
+<footer>Corridor is made by one person for hikers. It works with no signal by design, and the
+only thing it ever sends is a comment you chose to write.</footer>
 
 </body>
 </html>
