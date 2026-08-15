@@ -120,6 +120,16 @@
     line-height:1.12; margin:0 0 .8rem; text-wrap:balance;
   }
   .panel p { margin:0; color:var(--faint); font-size:1.05rem; text-wrap:pretty; max-width:30rem; }
+  /* One beat has a face beside it — the last, which is the only claim about the whole app rather
+     than about a screen of it. Sized to sit inside the height the longest text panel already
+     needs, or every other panel would gain a hole underneath to make room for it. */
+  .panel.has-image { display:flex; gap:1.25rem; align-items:flex-start; }
+  .panel.has-image p { max-width:26rem; }
+  .panel .face {
+    flex:none; width:132px; height:176px; object-fit:cover; border-radius:12px;
+    border:1px solid var(--hair);
+  }
+  @media (max-width:30rem) { .panel .face { width:96px; height:128px; } }
   @media (prefers-reduced-motion: reduce) {
     .panel { transition:opacity .2s linear; transform:none; }
     .panel.on { transform:none; }
@@ -164,20 +174,6 @@
   .answers li { padding:1.05rem 0; border-bottom:1px solid var(--hair); text-wrap:pretty; }
   .answers li:first-child { border-top:1px solid var(--hair); }
   .answers b { font-weight:600; }
-
-  .trails { display:grid; gap:1rem; margin:2.2rem auto 0; max-width:44rem;
-            grid-template-columns:1fr; }
-  @media (min-width:44rem) { .trails { grid-template-columns:repeat(3,1fr); } }
-  .trail { background:var(--wash); border:1px solid var(--hair); border-radius:14px;
-           padding:1.15rem 1.25rem; }
-  .trail .name { font-weight:600; letter-spacing:-.012em; }
-  .trail .num { font-size:.88rem; color:var(--faint); margin-top:.2rem; }
-  .centred { max-width:38rem; margin:1.3rem auto 0; text-align:center; }
-
-  .note { max-width:36rem; margin:0 auto; }
-  section.plain .note h2 { text-align:left; }
-  .note p { margin:0 0 1rem; }
-  .note .sig { color:var(--faint); font-size:.95rem; margin-top:1.3rem; }
 
   section.closing { padding:5rem 0 3.5rem; text-align:center; }
   section.closing h2 { margin-bottom:1.4rem; font-size:clamp(1.6rem,4.5vw,2.1rem);
@@ -239,7 +235,7 @@
 
 <section class="plain">
   <div class="wrap">
-    <h2>What it answers</h2>
+    <h2>Questions we have on trail</h2>
     <ul class="answers">
       <li><b>How far to the next water</b>, the next place to sleep, the next town.</li>
       <li><b>What's worth knowing before the next section</b> — permits, river crossings,
@@ -247,44 +243,6 @@
       <li><b>How far you've walked today</b> and what's left to where you're stopping.</li>
       <li><b>What an alternate costs you</b>, before you commit to it.</li>
     </ul>
-  </div>
-</section>
-
-<section class="plain">
-  <div class="wrap">
-    <h2>It works with no signal at all</h2>
-    <p class="centred">A trail's whole topographic map downloads once and works with the phone in
-    airplane mode. No signal, no server, no account. Contours, hillshading, ground cover, huts,
-    water, towns and the roads you walk in on.</p>
-    <div class="trails">
-      <div class="trail">
-        <div class="name">Te Araroa</div>
-        <div class="num">New Zealand · 2 986 km</div>
-      </div>
-      <div class="trail">
-        <div class="name">Great Divide Trail</div>
-        <div class="num">Canada · 1 084 km</div>
-      </div>
-      <div class="trail">
-        <div class="name">Pacific Crest Trail</div>
-        <div class="num">United States · 4 153 km</div>
-      </div>
-    </div>
-    <p class="centred" style="color:var(--faint); font-size:.9rem;">More are being added.</p>
-  </div>
-</section>
-
-<section class="plain">
-  <div class="wrap note">
-    <h2>A note on the data</h2>
-    <p>Every waypoint comes from the trail's own association or from open data. I can't
-    hand-verify all of them, and no water source is truly reliable until someone who was there
-    says so. If you're out and something's wrong,
-    <a href="mailto:beiserjohannes@gmail.com">tell me</a> and I'll fix it.</p>
-    <p>Corridor is a planning and navigation aid, not a substitute for a paper map, a compass,
-    or the trail organisation's own current notices.</p>
-    <p class="sig">— Pez, who walked the CDT, the PCT, the GDT and Te Araroa, and built this
-    because he wanted one app that answered the questions he actually had out there.</p>
   </div>
 </section>
 
@@ -314,7 +272,7 @@
 <!-- Written by Tools/publish-demo.py straight out of the take that produced the video, so the
      words beside the phone cannot drift from what the phone is doing. Do not edit by hand. -->
 <script id="demo-timeline" type="application/json">
-{"path": "gdt-tour", "durationSeconds": 77.591, "beats": [{"id": "stand", "start": 0.004, "end": 2.555, "title": "Everything on one screen.", "body": "The map and the elevation profile stay in sync. The map is a corridor along the trail — up is ahead, down is behind."}, {"id": "walk-on", "start": 2.555, "end": 10.584, "title": "The page turns as you walk.", "body": "Scroll forward and the frame follows the trail's own course, so the line always points up the screen."}, {"id": "open-helmet-falls", "start": 10.584, "end": 13.82, "title": "Hold anything to open it.", "body": "Helmet Falls — a campsite eight kilometres ahead, with what a night there is like and how far off the line it sits."}, {"id": "set-destination", "start": 13.82, "end": 17.975, "title": "Make it today's destination.", "body": "Every figure on the day screen now measures to it — what is left, what it climbs, when you arrive."}, {"id": "frame-the-day", "start": 17.975, "end": 20.364, "title": "Triple tap frames the day.", "body": "The window opens to hold everything between where you stand and where you are stopping."}, {"id": "draw-the-disc", "start": 20.365, "end": 27.854, "title": "Look at any place in 3D.", "body": "Two thumbs draw a circle on the map — here Wolverine Pass, and 3.1 km of ground around it."}, {"id": "spin-the-disc", "start": 27.854, "end": 35.583, "title": "Turn it in your hand.", "body": "The trail is drawn on the ground it actually crosses, with your own position on it. Lowest, highest, steepest, underneath."}, {"id": "trail-info", "start": 35.583, "end": 37.912, "title": "What the trail asks of you.", "body": "The season, the two directions' start windows, the permits — every claim carrying a link to the authority it came from."}, {"id": "find-coral-pass", "start": 37.912, "end": 44.094, "title": "Every way round is listed.", "body": "Coral Pass: +15.8 km and +1 320 m. Those two numbers are what you actually choose on."}, {"id": "show-on-map", "start": 44.094, "end": 46.621, "title": "See where it leaves.", "body": "The map goes to the junction the alternate branches at."}, {"id": "switch-it-on", "start": 46.621, "end": 53.469, "title": "Take it, and the trail re-routes.", "body": "Distance, climb and the elevation profile all follow. Switch it off and they come back."}, {"id": "pull-back", "start": 53.469, "end": 56.87, "title": "The zoom is a scale.", "body": "The page holds this much line however far you scroll — twenty kilometres of it here."}, {"id": "to-the-planner", "start": 56.871, "end": 59.222, "title": "Plan the next sections.", "body": "Back at Waterton with nothing walked, which is where anybody starts."}, {"id": "auto-plan", "start": 59.222, "end": 65.878, "title": "Or let it plan the whole trail.", "body": "Forty kilometres a day, two to six days between towns. It cuts the trail into carries at the towns that fit."}, {"id": "open-a-section", "start": 65.878, "end": 70.2, "title": "What a carry costs.", "body": "Distance, climb, nights, and the longest dry stretch — counting only reliable water, and again counting every source the map has."}, {"id": "the-amiskwi", "start": 70.2, "end": 75.583, "title": "And what is worth knowing before you walk in.", "body": "The Amiskwi valley is the brushiest trail on the GDT. A fact about a length of trail rather than a point on it, so it is attached to the whole stretch."}, {"id": "end", "start": 75.583, "end": 77.591, "title": "All of it offline.", "body": "The whole trail's topographic map lives on the phone. No signal, no server, no account."}]}
+{"path": "gdt-tour", "durationSeconds": 76.24, "beats": [{"id": "one-screen", "start": 0.001, "end": 13.683, "title": "Everything on one screen.", "body": "The map and the elevation profile stay in sync. The map is a corridor along the trail — up is ahead, down is behind."}, {"id": "destination", "start": 13.684, "end": 20.321, "title": "Pick a destination", "body": "Choose where you plan to end your day and see the figures that matter to it."}, {"id": "three-d", "start": 20.322, "end": 35.32, "title": "Look at any place in 3D", "body": "See what the trail and its surroundings actually look like, so you know the ground before you walk it."}, {"id": "trail-info", "start": 35.321, "end": 43.878, "title": "Trail information", "body": "Read what this trail asks of you before you start — and see every alternate there is."}, {"id": "alternate", "start": 43.878, "end": 56.941, "title": "Choose an alternate", "body": "Re-route through any alternate and the whole trail adjusts itself around it."}, {"id": "planner", "start": 56.941, "end": 70.214, "title": "Section planner", "body": "Plan your next section or the whole trail, and see what is in it before you walk in — long water carries, bear-can rules, reservations, dangerous crossings, re-routes and closures."}, {"id": "all-trails", "start": 70.214, "end": 76.24, "title": "All major trails — free, for ever", "body": "Hi, I'm Pez. I'm a thru-hiker from Switzerland, and on every trail I walked I dreamt about making this app — one built entirely around what we actually need out there.", "image": "img/pez.webp", "imageAlt": "Pez standing on a rock at the edge of a turquoise glacial lake, looking up at a snow-streaked rock wall."}]}
 </script>
 
 <script>
@@ -331,12 +289,22 @@
   // cannot fade between them — it can only blink.
   var panels = beats.map(function (b) {
     var el = document.createElement('div');
-    el.className = 'panel';
+    el.className = 'panel' + (b.image ? ' has-image' : '');
+    var words = document.createElement('div');
     var h = document.createElement('h2');
     h.textContent = b.title;
     var p = document.createElement('p');
     p.textContent = b.body;
-    el.appendChild(h); el.appendChild(p);
+    words.appendChild(h); words.appendChild(p);
+    el.appendChild(words);
+    if (b.image) {
+      var face = document.createElement('img');
+      face.className = 'face';
+      face.src = b.image;
+      face.alt = b.imageAlt || '';
+      face.loading = 'lazy';
+      el.appendChild(face);
+    }
     panelHost.appendChild(el);
     return el;
   });
