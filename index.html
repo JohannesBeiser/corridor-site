@@ -117,10 +117,11 @@
 
   /* ---- the words beside it ---- */
   /* Height is measured and set by the script once the panels exist, because they are absolutely
-     positioned and would otherwise collapse to nothing. A fixed `min-height` was tried and is
-     wrong at both ends: tall enough for the longest beat leaves a hole under every short one, and
-     short enough to look right leaves the longest one overlapping the ticks. */
-  .panels { position:relative; min-height:9rem; }
+     positioned and would otherwise collapse to nothing. It tracks whichever panel is showing
+     rather than the tallest of them and animates between beats — a fixed height sized for the
+     longest one left every shorter beat with a gap under it and the controls sitting well below
+     the text they belonged to. */
+  .panels { position:relative; min-height:9rem; transition:height .35s ease; }
   .panel {
     position:absolute; inset:0; opacity:0; transform:translateY(10px);
     transition:opacity .45s ease, transform .45s ease;
@@ -133,9 +134,10 @@
   }
   .panel p { margin:0; color:var(--faint); font-size:1.05rem; text-wrap:pretty; max-width:30rem; }
   /* One beat has a face beside it — the last, which is the only claim about the whole app rather
-     than about a screen of it. Sized to sit inside the height the longest text panel already
-     needs, or every other panel would gain a hole underneath to make room for it. */
-  .panel.has-image { display:flex; gap:1.25rem; align-items:flex-start; }
+     than about a screen of it. The heading stays a direct child of the panel, at the panel's
+     full width; only the paragraph shares a row with the face, on its right at every width,
+     rather than the image narrowing the heading down to the same column. */
+  .panel.has-image .row { display:flex; gap:1.25rem; align-items:flex-start; }
   .panel.has-image p { max-width:26rem; }
   .panel .face {
     flex:none; width:132px; height:176px; object-fit:cover; border-radius:12px;
@@ -145,6 +147,7 @@
   @media (prefers-reduced-motion: reduce) {
     .panel { transition:opacity .2s linear; transform:none; }
     .panel.on { transform:none; }
+    .panels { transition:none; }
   }
 
   /* One tick per beat, filling as the film runs, and each one a button that jumps there. A
@@ -326,20 +329,26 @@
   var panels = beats.map(function (b) {
     var el = document.createElement('div');
     el.className = 'panel' + (b.image ? ' has-image' : '');
-    var words = document.createElement('div');
     var h = document.createElement('h2');
     h.textContent = b.title;
+    el.appendChild(h);
     var p = document.createElement('p');
     p.textContent = b.body;
-    words.appendChild(h); words.appendChild(p);
-    el.appendChild(words);
     if (b.image) {
+      // The heading stays outside this row, so the face narrows only the paragraph beside it
+      // rather than the title above it.
+      var row = document.createElement('div');
+      row.className = 'row';
+      row.appendChild(p);
       var face = document.createElement('img');
       face.className = 'face';
       face.src = b.image;
       face.alt = b.imageAlt || '';
       face.loading = 'lazy';
-      el.appendChild(face);
+      row.appendChild(face);
+      el.appendChild(row);
+    } else {
+      el.appendChild(p);
     }
     panelHost.appendChild(el);
     return el;
@@ -367,28 +376,31 @@
     return { el: t, fill: fill };
   });
 
-  // The tallest panel decides the block's height. Measured rather than guessed, and measured
-  // again on resize: the same words are two lines at one width and four at another.
+  // Each panel's own height, measured rather than guessed, and re-measured on resize: the same
+  // words are two lines at one width and four at another. The block tracks whichever panel is
+  // showing rather than the tallest of them, so the controls sit right under the text.
+  var showing = -1;
+  var panelHeights = [];
   function fit() {
     panelHost.style.height = 'auto';
-    var tallest = 0;
-    panels.forEach(function (el) {
+    panelHeights = panels.map(function (el) {
       var was = el.style.position;
       el.style.position = 'relative';
-      tallest = Math.max(tallest, el.offsetHeight);
+      var h = el.offsetHeight;
       el.style.position = was;
+      return h;
     });
-    panelHost.style.height = tallest + 'px';
+    panelHost.style.height = (panelHeights[showing] != null ? panelHeights[showing] : panelHeights[0] || 0) + 'px';
   }
   fit();
   window.addEventListener('resize', fit);
   if (document.fonts && document.fonts.ready) { document.fonts.ready.then(fit); }
 
-  var showing = -1;
   function show(i) {
     if (i === showing) { return; }
     if (panels[showing]) { panels[showing].classList.remove('on'); }
     if (panels[i]) { panels[i].classList.add('on'); }
+    if (panelHeights[i] != null) { panelHost.style.height = panelHeights[i] + 'px'; }
     // Widths set inline rather than by class: the running tick is filled by percentage every
     // frame, and an inline width beats a class, so a beat that has been passed has to be told
     // outright that it is full.
