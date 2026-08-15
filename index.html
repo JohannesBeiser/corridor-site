@@ -85,6 +85,16 @@
     .film .wrap { grid-template-columns:minmax(0,344px) minmax(0,1fr); gap:4.5rem;
                   justify-items:stretch; }
   }
+  /* The text-and-controls column carries no width of its own, so under `justify-items:center`
+     it shrink-wraps to its own min-content — a column a few words wide, with the play button
+     sitting on top of the overflowing text. `.phone` stays centered by that same rule; this is
+     the one child that needs to fill the track instead. */
+  .film .wrap > .tour-text { width:100%; min-width:0; }
+
+  /* ---- mobile: less on the hero ---- */
+  @media (max-width:40rem) {
+    .lede, .facts, header.hero .cta-note { display:none; }
+  }
 
   /* The bezel is drawn here rather than filmed: a simulator records the screen and nothing
      round it, and a frame in CSS stays sharp at any size, follows the theme, and costs no bytes. */
@@ -214,14 +224,14 @@
 <section class="film" id="see-it">
   <div class="wrap">
     <div class="phone">
-      <video id="film" playsinline autoplay muted loop preload="metadata"
+      <video id="film" playsinline muted loop preload="metadata"
              poster="demo/poster.webp"
              aria-label="A walk through Corridor on the Great Divide Trail: scrolling the map, opening a campsite, drawing a piece of ground in 3D, taking an alternate and planning a section.">
         <source src="demo/gdt-tour.mp4" type="video/mp4">
       </video>
     </div>
 
-    <div>
+    <div class="tour-text">
       <div class="panels" id="panels"></div>
       <div class="controls">
         <button class="playpause" id="playpause" type="button" aria-label="Pause the tour">
@@ -435,14 +445,27 @@
     film.style.opacity = into < FADE ? String(0.25 + 0.75 * (into / FADE)) : '1';
   });
 
-  // Some browsers refuse to autoplay until the element is on screen; asking again on the first
-  // scroll costs nothing and fixes the case where the hero is tall.
-  var kick = function () {
+  // Held back until a third of the phone is on screen, so scrolling past the hero doesn't cost
+  // the first beat before anyone's looking — then left running for good: once it has started
+  // it loops on its own and nothing here ever pauses it again.
+  var phone = document.querySelector('.phone');
+  function start() {
     var playing = film.play();
     if (playing && playing.catch) { playing.catch(function () {}); }
-    window.removeEventListener('scroll', kick);
-  };
-  window.addEventListener('scroll', kick, { passive: true, once: true });
+  }
+  if (phone && 'IntersectionObserver' in window) {
+    var startObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          start();
+          startObserver.disconnect();
+        }
+      });
+    }, { threshold: 0.33 });
+    startObserver.observe(phone);
+  } else {
+    start();
+  }
 }());
 </script>
 
