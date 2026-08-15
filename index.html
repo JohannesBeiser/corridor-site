@@ -351,12 +351,13 @@
     var fill = document.createElement('i');
     bar.appendChild(fill);
     t.appendChild(bar);
-    // Jumping is a request to watch that bit, so it plays whether or not it was paused.
+    // **Jumping does not change whether it is running.** Somebody who paused to look at a frame
+    // and then picks another beat wants that beat's frame, not playback starting under them —
+    // paused is a mode they chose, and a control that quietly undoes it is a control that has to
+    // be fought. Seeking a paused video still renders the new frame.
     t.addEventListener('click', function () {
       film.currentTime = b.start + 0.05;
       show(i);
-      var p = film.play();
-      if (p && p.catch) { p.catch(function () {}); }
     });
     tickHost.appendChild(t);
     return { el: t, fill: fill };
