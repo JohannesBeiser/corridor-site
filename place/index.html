@@ -43,10 +43,19 @@
   .trail { color: var(--faint); margin: 0 0 1.6rem; font-size: 1rem; }
 
   .coords {
-    display: inline-block; font-variant-numeric: tabular-nums; color: var(--faint);
+    display: inline-flex; align-items: center; gap: .5rem;
+    font-variant-numeric: tabular-nums; color: var(--faint);
     font-size: .85rem; border: 1px solid var(--hair); border-radius: 100px;
-    padding: .35rem .9rem; margin: 0 0 2.4rem;
+    padding: .35rem .5rem .35rem .9rem; margin: 0 0 2.4rem;
   }
+  .copy {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; padding: 0; border: none; background: none;
+    color: var(--faint); cursor: pointer;
+  }
+  .copy:hover { color: var(--ink); }
+  .copy svg { width: 14px; height: 14px; }
+  .copy.copied { color: var(--you); }
 
   .lede { color: var(--faint); font-size: .95rem; margin: 0 0 2rem; }
 
@@ -71,10 +80,20 @@
 <h1 id="title">Somewhere on the trail</h1>
 <p class="trail" id="trail"></p>
 
-<p class="coords" id="coords" hidden></p>
+<div class="coords" id="coords" hidden>
+  <span id="coordsText"></span>
+  <button class="copy" id="copyBtn" type="button" aria-label="Copy the coordinates">
+    <svg id="copyIcon" viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M9 8.5h8.5A1.5 1.5 0 0 1 19 10v9a1.5 1.5 0 0 1-1.5 1.5H10A1.5 1.5 0 0 1 8.5 19v-9A1.5 1.5 0 0 1 9 8.5Z"/>
+      <path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+            stroke-linejoin="round" d="M6.5 15.5h-1A1.5 1.5 0 0 1 4 14V5a1.5 1.5 0 0 1 1.5-1.5H14A1.5 1.5 0 0 1 15.5 5v1"/>
+    </svg>
+  </button>
+</div>
 
-<p class="lede">Corridor opens straight to this place once it's installed — the whole line, its
-waypoints and its water sources work offline, with no account and nothing to sign in to.</p>
+<p class="lede">Corridor opens straight to this place once it's installed.</p>
 
 <a class="cta" href="https://apps.apple.com/app/id6801537739">
   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.05 12.54c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.72-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.87-.76-1.48.02-2.84.86-3.6 2.18-1.53 2.66-.39 6.6 1.1 8.76.73 1.06 1.6 2.25 2.74 2.2 1.1-.04 1.51-.71 2.84-.71 1.32 0 1.7.71 2.86.69 1.18-.02 1.93-1.08 2.65-2.14.84-1.23 1.18-2.42 1.2-2.48-.03-.01-2.29-.88-2.31-3.5zM14.9 5.9c.6-.74 1.01-1.76.9-2.78-.87.04-1.93.58-2.56 1.31-.56.65-1.06 1.69-.93 2.69.97.07 1.97-.49 2.59-1.22z"/></svg>
@@ -116,9 +135,29 @@ waypoints and its water sources work offline, with no account and nothing to sig
   }
 
   if (!isNaN(lat) && !isNaN(lon)) {
-    var el = document.getElementById('coords');
-    el.textContent = lat.toFixed(5) + ', ' + lon.toFixed(5);
-    el.hidden = false;
+    document.getElementById('coordsText').textContent = lat.toFixed(5) + ', ' + lon.toFixed(5);
+    document.getElementById('coords').hidden = false;
+
+    // The plain pair, not the rounded display version — what's on the clipboard has to paste
+    // into a maps app or a search box, the same reason the app's own copy button does this.
+    var full = lat.toFixed(6) + ', ' + lon.toFixed(6);
+    var btn = document.getElementById('copyBtn');
+    var icon = document.getElementById('copyIcon');
+    var copyGlyph = icon.innerHTML;
+    var checkGlyph = '<path fill="none" stroke="currentColor" stroke-width="2" '
+      + 'stroke-linecap="round" stroke-linejoin="round" d="M5 12.5l4.5 4.5L19 7"/>';
+    btn.addEventListener('click', function () {
+      navigator.clipboard.writeText(full).then(function () {
+        icon.innerHTML = checkGlyph;
+        btn.classList.add('copied');
+        btn.setAttribute('aria-label', 'Coordinates copied');
+        setTimeout(function () {
+          icon.innerHTML = copyGlyph;
+          btn.classList.remove('copied');
+          btn.setAttribute('aria-label', 'Copy the coordinates');
+        }, 1600);
+      });
+    });
   }
 })();
 </script>
