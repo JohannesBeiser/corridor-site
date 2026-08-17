@@ -1,0 +1,15 @@
+{
+    "applinks": {
+        "details": [
+            {
+                "appIDs": ["3YM3TW3HUV.com.johannesbeiser.corridor"],
+                "components": [
+                    {
+                        "/": "/place",
+                        "comment": "Matches /place with any query string — trail, lat, lon and an optional key"
+                    }
+                ]
+            }
+        ]
+    }
+}

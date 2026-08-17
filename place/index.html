@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A shared place — Corridor</title>
+<link rel="icon" href="../favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<style>
+  :root {
+    --paper:#FBFAF7; --ink:#1C1F21; --faint:#6B7276; --hair:#DBD8D2;
+    --you:#B0384A; --water:#2F6F92;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper:#101314; --ink:#E6E8E9; --faint:#9AA1A5; --hair:#2C3235;
+      --you:#D4697A; --water:#6FA6C4;
+    }
+  }
+  html { background: var(--paper); }
+  body {
+    font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+    color: var(--ink); background: var(--paper);
+    max-width: 30rem; margin: 0 auto; padding: 3rem 1.25rem 4rem;
+    line-height: 1.55; font-size: 17px; text-align: center;
+  }
+  .back {
+    display: block; text-align: left; font-size: .9rem; margin: 0 0 2.5rem;
+  }
+  .back a { color: var(--faint); text-decoration: none; }
+  .back a:hover { text-decoration: underline; }
+
+  .dot {
+    width: 11px; height: 11px; border-radius: 50%; background: var(--water);
+    display: inline-block; margin-right: .5rem; vertical-align: middle;
+  }
+  .kind {
+    font-size: .82rem; letter-spacing: .01em; color: var(--faint); margin: 0 0 .3rem;
+  }
+  h1 {
+    font-size: 1.7rem; margin: 0 0 .35rem; letter-spacing: -.01em; line-height: 1.25;
+  }
+  .trail { color: var(--faint); margin: 0 0 1.6rem; font-size: 1rem; }
+
+  .coords {
+    display: inline-block; font-variant-numeric: tabular-nums; color: var(--faint);
+    font-size: .85rem; border: 1px solid var(--hair); border-radius: 100px;
+    padding: .35rem .9rem; margin: 0 0 2.4rem;
+  }
+
+  .lede { color: var(--faint); font-size: .95rem; margin: 0 0 2rem; }
+
+  .cta {
+    display: inline-flex; align-items: center; gap: .6rem;
+    background: var(--you); color: var(--paper); font-weight: 600; font-size: 1.02rem;
+    padding: .8rem 1.9rem; border-radius: 100px; letter-spacing: -.005em;
+    text-decoration: none; box-shadow: 0 2px 10px rgba(176,56,74,.28);
+  }
+  .cta svg { width: 18px; height: 18px; fill: currentColor; }
+  .cta-note { display: block; margin-top: .9rem; font-size: .84rem; color: var(--faint); }
+
+  footer { margin-top: 3.5rem; font-size: .85rem; color: var(--faint); }
+  footer a { color: inherit; }
+</style>
+</head>
+<body>
+
+<p class="back"><a href="../">← Corridor</a></p>
+
+<p class="kind" id="kind">A place, shared</p>
+<h1 id="title">Somewhere on the trail</h1>
+<p class="trail" id="trail"></p>
+
+<p class="coords" id="coords" hidden></p>
+
+<p class="lede">Corridor opens straight to this place once it's installed — the whole line, its
+waypoints and its water sources work offline, with no account and nothing to sign in to.</p>
+
+<a class="cta" href="https://apps.apple.com/app/id6801537739">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.05 12.54c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.72-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.87-.76-1.48.02-2.84.86-3.6 2.18-1.53 2.66-.39 6.6 1.1 8.76.73 1.06 1.6 2.25 2.74 2.2 1.1-.04 1.51-.71 2.84-.71 1.32 0 1.7.71 2.86.69 1.18-.02 1.93-1.08 2.65-2.14.84-1.23 1.18-2.42 1.2-2.48-.03-.01-2.29-.88-2.31-3.5zM14.9 5.9c.6-.74 1.01-1.76.9-2.78-.87.04-1.93.58-2.56 1.31-.56.65-1.06 1.69-.93 2.69.97.07 1.97-.49 2.59-1.22z"/></svg>
+  Download on the App Store
+</a>
+<span class="cta-note">Free · iPhone · iOS 18+ · no account, no subscription</span>
+
+<footer><a href="../support.html">Support</a> · <a href="../privacy.html">Privacy</a></footer>
+
+<script>
+(function () {
+  // **Read apart by hand rather than trusted to a framework** — this page has one job and
+  // ships no build step. `PlaceLink` on the app's side is the source of truth for the shape;
+  // this only ever reads what that already writes.
+  var params = new URLSearchParams(location.search);
+  var trailSlug = params.get('trail');
+  var name = params.get('name');
+  var lat = parseFloat(params.get('lat'));
+  var lon = parseFloat(params.get('lon'));
+
+  var TRAILS = {
+    'te-araroa': 'the Te Araroa',
+    'gdt': 'the Great Divide Trail',
+    'pct': 'the Pacific Crest Trail'
+  };
+
+  if (name) {
+    document.getElementById('title').textContent = name;
+    document.getElementById('kind').textContent = 'A place, shared';
+  } else {
+    document.getElementById('title').textContent = 'A place on the trail';
+    document.getElementById('kind').textContent = 'Somewhere off the line, shared';
+  }
+
+  if (trailSlug) {
+    var trailName = TRAILS[trailSlug] ||
+      trailSlug.split('-').map(function (w) { return w[0].toUpperCase() + w.slice(1); }).join(' ');
+    document.getElementById('trail').textContent = 'On ' + trailName;
+  }
+
+  if (!isNaN(lat) && !isNaN(lon)) {
+    var el = document.getElementById('coords');
+    el.textContent = lat.toFixed(5) + ', ' + lon.toFixed(5);
+    el.hidden = false;
+  }
+})();
+</script>
+
+</body>
+</html>
