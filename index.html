@@ -57,13 +57,18 @@
   .tagline { font-size:clamp(1.05rem,3vw,1.3rem); color:var(--faint); margin:0 0 1.8rem; }
   .lede { max-width:34rem; margin:0 auto 2.3rem; font-size:1.08rem; text-wrap:pretty; }
 
-  .cta { display:inline-flex; align-items:center; gap:.6rem;
+  .cta { display:inline-flex; align-items:center; gap:.6rem; border:0; font-family:inherit;
          background:var(--you); color:var(--paper); font-weight:600; font-size:1.05rem;
-         padding:.85rem 2rem; border-radius:100px; letter-spacing:-.005em;
+         padding:.85rem 2rem; border-radius:100px; letter-spacing:-.005em; cursor:pointer;
          box-shadow:0 2px 10px rgba(176,56,74,.28); transition:transform .12s ease; }
   .cta:hover { text-decoration:none; transform:translateY(-1px); }
   .cta svg { width:19px; height:19px; fill:currentColor; }
   .cta-note { display:block; margin-top:.85rem; font-size:.86rem; color:var(--faint); }
+  .cta:disabled {
+    opacity:.45; cursor:not-allowed; box-shadow:none; pointer-events:none;
+  }
+  .launch-note { display:block; margin-top:.85rem; font-size:.95rem; font-weight:600; color:var(--ink); }
+  .launch-note .countdown { font-weight:400; color:var(--faint); }
 
   .facts {
     display:flex; flex-wrap:wrap; justify-content:center; gap:.6rem 0;
@@ -210,10 +215,11 @@
     <p class="lede">Made by thru-hikers for thru-hikers, this app is hand tailored to what we need
     on trail.</p>
 
-    <a class="cta" href="https://apps.apple.com/app/id6801537739">
+    <button type="button" class="cta" disabled aria-disabled="true">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.05 12.54c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.72-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.87-.76-1.48.02-2.84.86-3.6 2.18-1.53 2.66-.39 6.6 1.1 8.76.73 1.06 1.6 2.25 2.74 2.2 1.1-.04 1.51-.71 2.84-.71 1.32 0 1.7.71 2.86.69 1.18-.02 1.93-1.08 2.65-2.14.84-1.23 1.18-2.42 1.2-2.48-.03-.01-2.29-.88-2.31-3.5zM14.9 5.9c.6-.74 1.01-1.76.9-2.78-.87.04-1.93.58-2.56 1.31-.56.65-1.06 1.69-.93 2.69.97.07 1.97-.49 2.59-1.22z"/></svg>
       Download on the App Store
-    </a>
+    </button>
+    <p class="launch-note">Launching October 25, 2026 · <span class="countdown"></span></p>
     <span class="cta-note">Free · iPhone · iOS 18+ · no account, no subscription</span>
 
     <p class="facts">
@@ -296,10 +302,11 @@
 <section class="closing">
   <div class="wrap">
     <h2>Get it on your phone</h2>
-    <a class="cta" href="https://apps.apple.com/app/id6801537739">
+    <button type="button" class="cta" disabled aria-disabled="true">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.05 12.54c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.72-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.87-.76-1.48.02-2.84.86-3.6 2.18-1.53 2.66-.39 6.6 1.1 8.76.73 1.06 1.6 2.25 2.74 2.2 1.1-.04 1.51-.71 2.84-.71 1.32 0 1.7.71 2.86.69 1.18-.02 1.93-1.08 2.65-2.14.84-1.23 1.18-2.42 1.2-2.48-.03-.01-2.29-.88-2.31-3.5zM14.9 5.9c.6-.74 1.01-1.76.9-2.78-.87.04-1.93.58-2.56 1.31-.56.65-1.06 1.69-.93 2.69.97.07 1.97-.49 2.59-1.22z"/></svg>
       Download on the App Store
-    </a>
+    </button>
+    <p class="launch-note">Launching October 25, 2026 · <span class="countdown"></span></p>
     <span class="cta-note">Free · iPhone · iOS 18+</span>
   </div>
 </section>
@@ -497,6 +504,21 @@
   } else {
     start();
   }
+}());
+</script>
+
+<script>
+(function () {
+  // One launch date, read wherever the button is disabled — so the two CTAs (hero and closing)
+  // can never quietly disagree about how many days are left.
+  var launch = new Date(2026, 9, 25);
+  var today = new Date();
+  today.setHours(0, 0, 0, 0);
+  var days = Math.ceil((launch - today) / 86400000);
+  var text = days > 1 ? days + ' days to go'
+    : days === 1 ? '1 day to go'
+    : 'launching today';
+  document.querySelectorAll('.countdown').forEach(function (el) { el.textContent = text; });
 }());
 </script>
 
