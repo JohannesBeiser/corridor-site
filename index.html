@@ -159,17 +159,10 @@
 
   /* One tick per beat, filling as the film runs, and each one a button that jumps there. A
      scrubber would be a video control on a page where the video is the argument rather than the
-     content; this says how many things there are to see and lets you go to any of them. */
-  .controls { display:flex; align-items:center; gap:.8rem; margin-top:1.7rem; max-width:30rem; }
-  .playpause {
-    flex:none; width:30px; height:30px; border-radius:50%; padding:0; cursor:pointer;
-    border:1px solid var(--hair); background:transparent; color:var(--ink);
-    display:grid; place-items:center; transition:border-color .15s ease, background .15s ease;
-  }
-  .playpause:hover { border-color:var(--faint); background:var(--wash); }
-  .playpause svg { width:10px; height:11px; fill:currentColor; display:block; }
-  .playpause svg.hidden { display:none; }
-
+     content; this says how many things there are to see and lets you go to any of them. There is
+     no play/pause here — the film runs on its own and never stops, so there is nothing for a
+     button to toggle. */
+  .controls { display:flex; align-items:center; margin-top:1.7rem; max-width:30rem; }
   .ticks { display:flex; gap:4px; flex:1; min-width:0; }
   /* The bar is 3 px and a 3 px target is not a target, so the button is 18 px of transparent
      height with the bar drawn down its middle. */
@@ -250,10 +243,6 @@
     <div class="tour-text">
       <div class="panels" id="panels"></div>
       <div class="controls">
-        <button class="playpause" id="playpause" type="button" aria-label="Pause the tour">
-          <svg id="icon-pause" viewBox="0 0 10 11" aria-hidden="true"><rect x="0" y="0" width="3.2" height="11" rx="1"/><rect x="6.8" y="0" width="3.2" height="11" rx="1"/></svg>
-          <svg id="icon-play" class="hidden" viewBox="0 0 10 11" aria-hidden="true"><path d="M0 .8a.8.8 0 0 1 1.2-.7l8 4.7a.8.8 0 0 1 0 1.4l-8 4.7A.8.8 0 0 1 0 10.2z"/></svg>
-        </button>
         <div class="ticks" id="ticks"></div>
       </div>
     </div>
@@ -448,29 +437,6 @@
   }
   show(0);
 
-  var pause = document.getElementById('playpause');
-  var iconPause = document.getElementById('icon-pause');
-  var iconPlay = document.getElementById('icon-play');
-  function sayState() {
-    var stopped = film.paused;
-    iconPause.classList.toggle('hidden', stopped);
-    iconPlay.classList.toggle('hidden', !stopped);
-    pause.setAttribute('aria-label', stopped ? 'Play the tour' : 'Pause the tour');
-  }
-  pause.addEventListener('click', function () {
-    if (film.paused) {
-      var p = film.play();
-      if (p && p.catch) { p.catch(function () {}); }
-    } else {
-      film.pause();
-    }
-  });
-  // Off the events rather than off the click, so the button is right when autoplay is refused,
-  // when the tab is backgrounded, and when a tick starts playback.
-  film.addEventListener('play', sayState);
-  film.addEventListener('pause', sayState);
-  sayState();
-
   var last = beats[beats.length - 1].end;
   var FADE = 0.45;
 
@@ -493,27 +459,15 @@
     film.style.opacity = into < FADE ? String(0.25 + 0.75 * (into / FADE)) : '1';
   });
 
-  // Held back until a third of the phone is on screen, so scrolling past the hero doesn't cost
-  // the first beat before anyone's looking — then left running for good: once it has started
-  // it loops on its own and nothing here ever pauses it again.
-  var phone = document.querySelector('.phone');
+  // Starts three seconds after the page has loaded, whether or not the phone is on screen yet,
+  // and is never paused again — there is no control left that could stop it, and `loop` on the
+  // element itself carries it round for good.
   function start() {
     var playing = film.play();
     if (playing && playing.catch) { playing.catch(function () {}); }
   }
-  if (phone && 'IntersectionObserver' in window) {
-    var startObserver = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
-          start();
-          startObserver.disconnect();
-        }
-      });
-    }, { threshold: 0.33 });
-    startObserver.observe(phone);
-  } else {
-    start();
-  }
+  function schedule() { setTimeout(start, 3000); }
+  if (document.readyState === 'complete') { schedule(); } else { window.addEventListener('load', schedule); }
 }());
 </script>
 
