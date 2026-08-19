@@ -1,0 +1,15 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Corridor//Launch//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:corridor-launch-2026-10-25@corridor-trails.com
+DTSTAMP:20260819T000000Z
+DTSTART;VALUE=DATE:20261025
+DTEND;VALUE=DATE:20261026
+SUMMARY:Corridor launches on the App Store
+DESCRIPTION:Offline maps for thru-hikers. https://corridor-trails.com/
+URL:https://corridor-trails.com/
+END:VEVENT
+END:VCALENDAR
