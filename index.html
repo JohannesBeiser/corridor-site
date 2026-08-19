@@ -476,6 +476,15 @@
   }
   function schedule() { setTimeout(start, 3000); }
   if (document.readyState === 'complete') { schedule(); } else { window.addEventListener('load', schedule); }
+
+  // Some WKWebView-based browsers on iOS — Chrome among them — refuse even a muted, inline
+  // `play()` call that has no gesture behind it at all, despite the policy that is supposed to
+  // allow it, so the timer above silently does nothing there. The first touch, scroll or click
+  // anywhere on the page is a second attempt; calling play() on a video that is already running
+  // is a harmless no-op, so this costs nothing on browsers where the timer already worked.
+  ['touchstart', 'scroll', 'click'].forEach(function (evt) {
+    window.addEventListener(evt, start, { passive: true, once: true });
+  });
 }());
 </script>
 
