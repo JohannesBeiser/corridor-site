@@ -3,18 +3,25 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Corridor — offline maps for thru-hikers</title>
-<meta name="description" content="The map and the elevation profile on one screen, and every trail's whole topographic map on your phone. Te Araroa, the Great Divide Trail and the Pacific Crest Trail. Free, no account, works in airplane mode.">
+<title>Corridor — thru-hiking navigation app with offline maps</title>
+<meta name="description" content="Made by thru-hikers for thru-hikers. Corridor is a thru-hiking navigation app hand-tailored to what we need on trail — offline maps, free, no account.">
+<link rel="canonical" href="https://corridor-trails.com/">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
 <link rel="icon" href="favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="theme-color" content="#FBFAF7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#101314" media="(prefers-color-scheme: dark)">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://corridor-trails.com/">
-<meta property="og:title" content="Corridor — offline maps for thru-hikers">
-<meta property="og:description" content="Map and elevation profile on one screen. Every trail's whole topographic map, offline. Free.">
+<meta property="og:site_name" content="Corridor">
+<meta property="og:title" content="Corridor — thru-hiking navigation app with offline maps">
+<meta property="og:description" content="Made by thru-hikers for thru-hikers. Corridor is a thru-hiking navigation app hand-tailored to what we need on trail — offline maps, free, no account.">
 <meta property="og:image" content="https://corridor-trails.com/demo/poster.webp">
+<meta property="og:image:alt" content="Corridor on an iPhone: the topographic map above, the elevation profile below, in sync.">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Corridor — thru-hiking navigation app with offline maps">
+<meta name="twitter:description" content="Made by thru-hikers for thru-hikers. Corridor is a thru-hiking navigation app hand-tailored to what we need on trail — offline maps, free, no account.">
+<meta name="twitter:image" content="https://corridor-trails.com/demo/poster.webp">
 <style>
   :root {
     --paper:#FBFAF7; --card:#FFFFFF; --ink:#1C1F21; --faint:#6B7276; --hair:#DBD8D2;
@@ -105,44 +112,6 @@
     .lede, .facts, header.hero .cta-note { display:none; }
   }
 
-  /* ---- mobile: the phone is sized by the screen it is being read on ---- */
-  /* **The film was as tall as the phone holding it, which is the one size it must not be.** The
-     bezel takes its width from the column and the video's own 720x1566 makes the height, so at
-     344 px wide it stood 748 px tall — taller than the viewport of most of the phones this page is
-     read on. So the words underneath it were always below the fold, and a film whose whole
-     argument is the paragraph beside it was showing the film and hiding the argument.
-
-     Sized by **height** here instead, and the width follows from the aspect: enough of the screen
-     left over for a beat's heading, its paragraph and the row of ticks, so the picture and the
-     sentence about it are on screen together. 17rem is that furniture — 1.75rem of gap, 9rem of
-     panel, the controls under it and a little air — and `min` with 70svh is the ceiling for a tall
-     phone, where the subtraction alone would leave a picture bigger than the page wants. Measured
-     against a 734 px small viewport, an iPhone 15 Pro in Safari: a 446 px picture, and the last
-     tick 12 px above the fold.
-
-     **`svh` rather than `vh`**: on a phone `vh` is the viewport with the browser chrome hidden,
-     which is a height the page does not have while anybody is scrolling it. The small viewport is
-     the one that is always true.
-
-     The last beat is deliberately not what this is measured against — it carries a face beside its
-     paragraph and is half again as tall as the other eight. Sizing for it would shrink the phone
-     for the whole film to fit the one beat at the end of it. */
-  @media (max-width:55.99rem) {
-    section.film { padding:2.5rem 0 3.5rem; }
-    .film .wrap { gap:1.75rem; }
-    .controls { margin-top:1.1rem; }
-    /* Shrink-wrapped, so the bezel is the picture's width and not the column's — its padding and
-       its corner radius are percentages and stay in proportion at any height. */
-    .phone { width:fit-content; max-width:100%; }
-    .phone video {
-      height:min(70svh, calc(100svh - 17rem));
-      width:auto; max-width:100%;
-      /* Held before the metadata arrives, so the page does not reflow under a reader's thumb
-         when the video announces its own shape. The film's real 720x1566. */
-      aspect-ratio:720 / 1566;
-    }
-  }
-
   /* The bezel is drawn here rather than filmed: a simulator records the screen and nothing
      round it, and a frame in CSS stays sharp at any size, follows the theme, and costs no bytes. */
   .phone {
@@ -224,11 +193,28 @@
     font-size:clamp(1.6rem,4.5vw,2.1rem); font-weight:600; letter-spacing:-.02em;
     margin:0 0 .4rem; text-align:center; text-wrap:balance;
   }
+  /* Sits between the h2 and the list, so the list loses a little of its own top margin. */
+  .section-lede {
+    max-width:34rem; margin:.6rem auto 0; text-align:center; color:var(--faint);
+    font-size:1.02rem; text-wrap:pretty;
+  }
+  .section-lede + .answers { margin-top:1.8rem; }
   .answers { list-style:none; padding:0; margin:2.2rem auto 0; max-width:44rem; }
   .answers li { padding:1.05rem 0; border-bottom:1px solid var(--hair); text-wrap:pretty; }
   .answers li:first-child { border-top:1px solid var(--hair); }
   .answers b { font-weight:600; }
   .answers .aside { display:block; margin-top:.35rem; font-size:.72rem; color:var(--faint); }
+
+  /* Same rhythm as .answers, but a dl — the question is the thing being marked up, not a bullet. */
+  .faq { margin:2.2rem auto 0; max-width:44rem; border-top:1px solid var(--hair); }
+  .faq dt { font-weight:600; padding:1.05rem 0 .2rem; }
+  /* The maker, in his own words, in the HTML rather than only in the JS timeline. */
+  .maker { margin:0 auto; max-width:38rem; text-align:center; }
+  .maker p { font-size:clamp(1.15rem,3.2vw,1.45rem); line-height:1.45; letter-spacing:-.012em;
+             text-wrap:pretty; margin:0 0 1rem; }
+  .maker footer { font-size:.9rem; color:var(--faint); }
+  .faq dd { margin:0; padding:0 0 1.05rem; color:var(--faint); border-bottom:1px solid var(--hair);
+            text-wrap:pretty; }
 
   section.closing { padding:5rem 0 3.5rem; text-align:center; }
   section.closing h2 { margin-bottom:1.4rem; font-size:clamp(1.6rem,4.5vw,2.1rem);
@@ -236,7 +222,261 @@
 
   footer { padding:2.5rem 0 4rem; text-align:center; color:var(--faint); font-size:.9rem; }
   footer nav { display:flex; flex-wrap:wrap; justify-content:center; gap:.6rem 1.5rem; }
+
+  /* **Last in the sheet on purpose, and it was not the first time.** A media query carries no
+     specificity of its own, so these rules only beat `.phone video { width:100%; height:auto }`
+     by coming after it. Written above that rule, as they were for one deploy, every line here
+     that matters is silently overridden and the phone on a mobile page is exactly the size it
+     always was — which is what it did, on the live site, looking for all the world like a cache. */
+  /* ---- mobile: the phone is sized by the screen it is being read on ---- */
+  /* **The film was as tall as the phone holding it, which is the one size it must not be.** The
+     bezel takes its width from the column and the video's own 720x1566 makes the height, so at
+     344 px wide it stood 748 px tall — taller than the viewport of most of the phones this page is
+     read on. So the words underneath it were always below the fold, and a film whose whole
+     argument is the paragraph beside it was showing the film and hiding the argument.
+
+     Sized by **height** here instead, and the width follows from the aspect: enough of the screen
+     left over for a beat's heading, its paragraph and the row of ticks, so the picture and the
+     sentence about it are on screen together. 17rem is that furniture — 1.75rem of gap, 9rem of
+     panel, the controls under it and the 1rem of section padding above — and `min` with 70svh is
+     the ceiling for a tall phone, where the subtraction alone would leave a picture bigger than the
+     page wants. Measured against a 734 px small viewport, an iPhone 15 Pro in Safari: a 486 px
+     picture, and the last tick 13 px above the fold.
+
+     **`svh` rather than `vh`**: on a phone `vh` is the viewport with the browser chrome hidden,
+     which is a height the page does not have while anybody is scrolling it. The small viewport is
+     the one that is always true.
+
+     The last beat is deliberately not what this is measured against — it carries a face beside its
+     paragraph and is half again as tall as the other eight. Sizing for it would shrink the phone
+     for the whole film to fit the one beat at the end of it. */
+  @media (max-width:55.99rem) {
+    /* **The gap between the launch line and the phone was two paddings, not one.** The hero ends
+       with 3rem under it and the film began with 4rem over it, so 7rem of paper sat between the
+       sentence that says when this ships and the thing it ships — read as a hole on a page whose
+       next screenful is the argument. A quarter of that is enough to say the two are different
+       sections, and the room it frees goes to the picture below. Both are scoped to this width:
+       on the wide layout the phone sits *beside* the words and the space above it is separating
+       nothing from nothing. */
+    header.hero { padding-bottom:1rem; }
+    section.film { padding:1rem 0 3.5rem; }
+    .film .wrap { gap:1.75rem; }
+    .controls { margin-top:1.1rem; }
+    /* Shrink-wrapped, so the bezel is the picture's width and not the column's — its padding and
+       its corner radius are percentages and stay in proportion at any height. */
+    .phone { width:fit-content; max-width:100%; }
+    .phone video {
+      height:min(70svh, calc(100svh - 15.5rem));
+      width:auto; max-width:100%;
+      /* Held before the metadata arrives, so the page does not reflow under a reader's thumb
+         when the video announces its own shape. The film's real 720x1566. */
+      aspect-ratio:720 / 1566;
+    }
+  }
 </style>
+
+<!-- Structured data. Google guesses a date for the snippet when a page gives it none, and it
+     guessed a stale one; dateModified below gives it a real one to use instead. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "MobileApplication",
+      "@id": "https://corridor-trails.com/#app",
+      "name": "Corridor",
+      "alternateName": "Corridor Trails",
+      "applicationCategory": "TravelApplication",
+      "applicationSubCategory": "Thru-hiking navigation",
+      "operatingSystem": "iOS 18",
+      "url": "https://corridor-trails.com/",
+      "installUrl": "https://testflight.apple.com/join/bbzZA5uk",
+      "image": "https://corridor-trails.com/img/icon.webp",
+      "screenshot": "https://corridor-trails.com/demo/poster.webp",
+      "description": "A thru-hiking navigation app made by thru-hikers. The topographic map and the elevation profile stay in sync on one screen, every trail's whole map works offline in airplane mode, and hikers' own water reports tell you what the next source is doing right now. Te Araroa, the Great Divide Trail and the Pacific Crest Trail.",
+      "featureList": [
+        "Offline topographic maps for the whole trail, no signal needed",
+        "Map and elevation profile in sync on one screen",
+        "Hiker-reported water sources: full, low or dry",
+        "Section planner with permits, closures, crossings and water carries",
+        "Custom alternates you draw yourself, with full elevation profile",
+        "Wrong-turn push notification",
+        "Shortest walk out to a road from anywhere",
+        "Offline sunrise and sunset",
+        "Battery-saving mode"
+      ],
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "isAccessibleForFree": true,
+      "author": {
+        "@id": "https://corridor-trails.com/#author"
+      },
+      "publisher": {
+        "@id": "https://corridor-trails.com/#org"
+      },
+      "keywords": "thru-hiking navigation app, offline hiking maps, thru-hike GPS, offline topographic maps, Te Araroa app, Pacific Crest Trail app, Great Divide Trail app, free hiking navigation, long-distance hiking app",
+      "audience": {
+        "@type": "Audience",
+        "audienceType": "Thru-hikers and long-distance backpackers"
+      },
+      "about": [
+        {
+          "@type": "Thing",
+          "name": "Thru-hiking"
+        },
+        {
+          "@type": "Thing",
+          "name": "Backpacking"
+        },
+        {
+          "@type": "Thing",
+          "name": "Offline navigation"
+        },
+        {
+          "@type": "Thing",
+          "name": "Topographic maps"
+        },
+        {
+          "@type": "Thing",
+          "name": "Te Araroa"
+        },
+        {
+          "@type": "Thing",
+          "name": "Pacific Crest Trail"
+        },
+        {
+          "@type": "Thing",
+          "name": "Great Divide Trail"
+        }
+      ],
+      "softwareVersion": "beta",
+      "datePublished": "2026-10-25",
+      "citation": [
+        {
+          "@type": "CreativeWork",
+          "name": "OpenStreetMap",
+          "url": "https://www.openstreetmap.org/"
+        },
+        {
+          "@type": "CreativeWork",
+          "name": "NASA Shuttle Radar Topography Mission (SRTM)",
+          "url": "https://www.earthdata.nasa.gov/data/instruments/srtm"
+        },
+        {
+          "@type": "CreativeWork",
+          "name": "Copernicus",
+          "url": "https://www.copernicus.eu/"
+        }
+      ]
+    },
+    {
+      "@type": "Person",
+      "@id": "https://corridor-trails.com/#author",
+      "name": "Pez",
+      "description": "Thru-hiker from Switzerland and the maker of Corridor.",
+      "knowsAbout": [
+        "Thru-hiking",
+        "Te Araroa",
+        "Pacific Crest Trail",
+        "Great Divide Trail",
+        "Offline map rendering",
+        "iOS development"
+      ]
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://corridor-trails.com/#org",
+      "name": "Corridor",
+      "url": "https://corridor-trails.com/",
+      "logo": "https://corridor-trails.com/img/icon.webp"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://corridor-trails.com/#website",
+      "url": "https://corridor-trails.com/",
+      "name": "Corridor",
+      "inLanguage": "en",
+      "publisher": {
+        "@id": "https://corridor-trails.com/#org"
+      }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://corridor-trails.com/#webpage",
+      "url": "https://corridor-trails.com/",
+      "name": "Corridor — thru-hiking navigation app with offline maps",
+      "isPartOf": {
+        "@id": "https://corridor-trails.com/#website"
+      },
+      "about": {
+        "@id": "https://corridor-trails.com/#app"
+      },
+      "dateModified": "2026-08-27T14:56:40Z",
+      "description": "Made by thru-hikers for thru-hikers. Corridor is a thru-hiking navigation app hand-tailored to what we need on trail — offline maps, free, no account."
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://corridor-trails.com/#faq",
+      "isPartOf": {
+        "@id": "https://corridor-trails.com/#website"
+      },
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is Corridor?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Corridor is a free offline navigation app for thru-hikers, built by a thru-hiker. The topographic map and the elevation profile sit on one screen and stay in sync, and the whole trail is already on the phone before you start walking. iPhone, iOS 18 and later."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which trails does it cover?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Three, at launch: Te Araroa (3,000 km / 1,864 mi), the Pacific Crest Trail (4,265 km / 2,650 mi) and the Great Divide Trail (1,130 km / 700 mi) — about 8,400 km (5,200 miles) of trail, with every official alternate. Adding a trail takes a name and a GPX file, so the list grows, and you can draw any line anywhere yourself and use it as if it shipped with the app."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does it work with no signal?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Every map is on the phone, not streamed. Each trail ships with a 90 km corridor of topographic detail plus a coarse 200-mile-wide road map around it, so you can still see where you are and how you would walk out, in airplane mode, in a canyon, on day nine."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What does it cost?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Nothing. No account, no subscription, no trial. The app launches on 25 October 2026 and the TestFlight beta is open now."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What does it do that a general hiking app does not?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "It only does long trails, so it can answer the questions a thru-hiker actually has: how far to the next water and whether another hiker found it dry, what the next section asks of you, what an alternate costs you in climbing, and the shortest walk out to a road if you get hurt."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Where do the maps come from?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Trail and terrain data from OpenStreetMap contributors and elevation from NASA SRTM and the EU Copernicus programme, rendered into a topographic style built for this app and then reviewed by hand, mile by mile, once a year."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
 </head>
 <body>
 
@@ -244,9 +484,9 @@
   <div class="wrap">
     <img class="icon" src="img/icon.webp" width="92" height="92" alt="The Corridor app icon: a trail line through a corridor of ground, with a red dot on it.">
     <h1>Corridor</h1>
-    <p class="tagline">Offline maps for thru-hikers</p>
-    <p class="lede">Made by thru-hikers for thru-hikers, this app is hand tailored to what we need
-    on trail.</p>
+    <p class="tagline">Thru-hiking navigation — offline maps for the whole trail</p>
+    <p class="lede">Made by thru-hikers for thru-hikers. This app is hand-tailored to what we
+    need on trail — on Te Araroa, the Great Divide Trail and the Pacific Crest Trail.</p>
 
     <a class="cta cta-beta" href="https://testflight.apple.com/join/bbzZA5uk" target="_blank" rel="noopener">
       Participate in beta testing NOW
@@ -284,6 +524,19 @@
         <div class="ticks" id="ticks"></div>
       </div>
     </div>
+    <noscript>
+      <!-- Mirrors #demo-timeline. Regenerate both from Tools/publish-demo.py. -->
+      <ul class="answers">
+      <li><b>Everything on one screen</b> — The map and the elevation profile stay in sync. The map is a corridor along the trail — up is ahead, down is behind.</li>
+      <li><b>Your day</b> — See your progress towards your destination in the top area.</li>
+      <li><b>Look at any place in 3D</b> — See what the trail and its surroundings actually look like, so you know the ground before you walk it.</li>
+      <li><b>Trail information</b> — Read what this trail asks of you before you start — and see every alternate there is.</li>
+      <li><b>Choose an alternate</b> — Re-route through any alternate and the whole trail adjusts itself around it.</li>
+      <li><b>Section planner</b> — Plan your next section or the whole trail, and see what is in it before you walk in — long water carries, bear-can rules, reservations, dangerous crossings, re-routes and closures.</li>
+      <li><b>A huge offline map</b> — A 90 km corridor around the trail, with the road map inside it — so you can always see where you are and how you would get out. Everything on screen is already on the phone: none of it needs a signal.</li>
+      <li><b>All major trails — free, for ever</b> — Hi, I&#x27;m Pez! I&#x27;m a Thru-Hiker from Switzerland and on all my trails I&#x27;ve dreamt about making this app. An app that is completely hand-tailored to the needs we have on trail.</li>
+      </ul>
+    </noscript>
   </div>
 </section>
 
@@ -304,6 +557,8 @@
 <section class="plain">
   <div class="wrap">
     <h2>Batteries included</h2>
+    <p class="section-lede">Everything a thru-hiking navigation app has to do on a long trail,
+    and the things we kept wishing ours would.</p>
     <ul class="answers">
       <li><b>Missing a trail?</b> — I've built the entire trail-creation process fully
       automated. All I need as input is the trail's name and a GPX file — that's it.
@@ -333,6 +588,39 @@
       <li><b>Waypoint comments</b> — share your insights about a place with other hikers.
       These also help improving the map in its yearly review</li>
     </ul>
+  </div>
+</section>
+
+<section class="plain" id="faq">
+  <div class="wrap">
+    <h2>Questions people ask before downloading</h2>
+    <dl class="faq">
+      <dt>What is Corridor?</dt>
+      <dd>Corridor is a free offline navigation app for thru-hikers, built by a thru-hiker. The topographic map and the elevation profile sit on one screen and stay in sync, and the whole trail is already on the phone before you start walking. iPhone, iOS 18 and later.</dd>
+      <dt>Which trails does it cover?</dt>
+      <dd>Three, at launch: Te Araroa (3,000 km / 1,864 mi), the Pacific Crest Trail (4,265 km / 2,650 mi) and the Great Divide Trail (1,130 km / 700 mi) — about 8,400 km (5,200 miles) of trail, with every official alternate. Adding a trail takes a name and a GPX file, so the list grows, and you can draw any line anywhere yourself and use it as if it shipped with the app.</dd>
+      <dt>Does it work with no signal?</dt>
+      <dd>Yes. Every map is on the phone, not streamed. Each trail ships with a 90 km corridor of topographic detail plus a coarse 200-mile-wide road map around it, so you can still see where you are and how you would walk out, in airplane mode, in a canyon, on day nine.</dd>
+      <dt>What does it cost?</dt>
+      <dd>Nothing. No account, no subscription, no trial. The app launches on 25 October 2026 and the TestFlight beta is open now.</dd>
+      <dt>What does it do that a general hiking app does not?</dt>
+      <dd>It only does long trails, so it can answer the questions a thru-hiker actually has: how far to the next water and whether another hiker found it dry, what the next section asks of you, what an alternate costs you in climbing, and the shortest walk out to a road if you get hurt.</dd>
+      <dt>Where do the maps come from?</dt>
+      <dd>Trail and terrain data from <a href="https://www.openstreetmap.org/">OpenStreetMap</a>
+      contributors and elevation from NASA <a href="https://www.earthdata.nasa.gov/data/instruments/srtm">SRTM</a>
+      and the EU <a href="https://www.copernicus.eu/">Copernicus</a> programme, rendered into a topographic
+      style built for this app and then reviewed by hand, mile by mile, once a year. Full credits are on the
+      <a href="licences.html">licensing page</a>.</dd>
+    </dl>
+  </div>
+</section>
+<section class="plain" id="why">
+  <div class="wrap">
+    <blockquote class="maker">
+      <p>I'm a thru-hiker from Switzerland, and on all my trails I dreamt about making this app —
+      one that is completely hand-tailored to the needs we have on trail.</p>
+      <footer>Pez, who walked the trails and wrote the app</footer>
+    </blockquote>
   </div>
 </section>
 
