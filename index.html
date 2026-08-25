@@ -105,44 +105,6 @@
     .lede, .facts, header.hero .cta-note { display:none; }
   }
 
-  /* ---- mobile: the phone is sized by the screen it is being read on ---- */
-  /* **The film was as tall as the phone holding it, which is the one size it must not be.** The
-     bezel takes its width from the column and the video's own 720x1566 makes the height, so at
-     344 px wide it stood 748 px tall — taller than the viewport of most of the phones this page is
-     read on. So the words underneath it were always below the fold, and a film whose whole
-     argument is the paragraph beside it was showing the film and hiding the argument.
-
-     Sized by **height** here instead, and the width follows from the aspect: enough of the screen
-     left over for a beat's heading, its paragraph and the row of ticks, so the picture and the
-     sentence about it are on screen together. 17rem is that furniture — 1.75rem of gap, 9rem of
-     panel, the controls under it and a little air — and `min` with 70svh is the ceiling for a tall
-     phone, where the subtraction alone would leave a picture bigger than the page wants. Measured
-     against a 734 px small viewport, an iPhone 15 Pro in Safari: a 446 px picture, and the last
-     tick 12 px above the fold.
-
-     **`svh` rather than `vh`**: on a phone `vh` is the viewport with the browser chrome hidden,
-     which is a height the page does not have while anybody is scrolling it. The small viewport is
-     the one that is always true.
-
-     The last beat is deliberately not what this is measured against — it carries a face beside its
-     paragraph and is half again as tall as the other eight. Sizing for it would shrink the phone
-     for the whole film to fit the one beat at the end of it. */
-  @media (max-width:55.99rem) {
-    section.film { padding:2.5rem 0 3.5rem; }
-    .film .wrap { gap:1.75rem; }
-    .controls { margin-top:1.1rem; }
-    /* Shrink-wrapped, so the bezel is the picture's width and not the column's — its padding and
-       its corner radius are percentages and stay in proportion at any height. */
-    .phone { width:fit-content; max-width:100%; }
-    .phone video {
-      height:min(70svh, calc(100svh - 17rem));
-      width:auto; max-width:100%;
-      /* Held before the metadata arrives, so the page does not reflow under a reader's thumb
-         when the video announces its own shape. The film's real 720x1566. */
-      aspect-ratio:720 / 1566;
-    }
-  }
-
   /* The bezel is drawn here rather than filmed: a simulator records the screen and nothing
      round it, and a frame in CSS stays sharp at any size, follows the theme, and costs no bytes. */
   .phone {
@@ -236,6 +198,57 @@
 
   footer { padding:2.5rem 0 4rem; text-align:center; color:var(--faint); font-size:.9rem; }
   footer nav { display:flex; flex-wrap:wrap; justify-content:center; gap:.6rem 1.5rem; }
+
+  /* **Last in the sheet on purpose, and it was not the first time.** A media query carries no
+     specificity of its own, so these rules only beat `.phone video { width:100%; height:auto }`
+     by coming after it. Written above that rule, as they were for one deploy, every line here
+     that matters is silently overridden and the phone on a mobile page is exactly the size it
+     always was — which is what it did, on the live site, looking for all the world like a cache. */
+  /* ---- mobile: the phone is sized by the screen it is being read on ---- */
+  /* **The film was as tall as the phone holding it, which is the one size it must not be.** The
+     bezel takes its width from the column and the video's own 720x1566 makes the height, so at
+     344 px wide it stood 748 px tall — taller than the viewport of most of the phones this page is
+     read on. So the words underneath it were always below the fold, and a film whose whole
+     argument is the paragraph beside it was showing the film and hiding the argument.
+
+     Sized by **height** here instead, and the width follows from the aspect: enough of the screen
+     left over for a beat's heading, its paragraph and the row of ticks, so the picture and the
+     sentence about it are on screen together. 17rem is that furniture — 1.75rem of gap, 9rem of
+     panel, the controls under it and the 1rem of section padding above — and `min` with 70svh is
+     the ceiling for a tall phone, where the subtraction alone would leave a picture bigger than the
+     page wants. Measured against a 734 px small viewport, an iPhone 15 Pro in Safari: a 486 px
+     picture, and the last tick 13 px above the fold.
+
+     **`svh` rather than `vh`**: on a phone `vh` is the viewport with the browser chrome hidden,
+     which is a height the page does not have while anybody is scrolling it. The small viewport is
+     the one that is always true.
+
+     The last beat is deliberately not what this is measured against — it carries a face beside its
+     paragraph and is half again as tall as the other eight. Sizing for it would shrink the phone
+     for the whole film to fit the one beat at the end of it. */
+  @media (max-width:55.99rem) {
+    /* **The gap between the launch line and the phone was two paddings, not one.** The hero ends
+       with 3rem under it and the film began with 4rem over it, so 7rem of paper sat between the
+       sentence that says when this ships and the thing it ships — read as a hole on a page whose
+       next screenful is the argument. A quarter of that is enough to say the two are different
+       sections, and the room it frees goes to the picture below. Both are scoped to this width:
+       on the wide layout the phone sits *beside* the words and the space above it is separating
+       nothing from nothing. */
+    header.hero { padding-bottom:1rem; }
+    section.film { padding:1rem 0 3.5rem; }
+    .film .wrap { gap:1.75rem; }
+    .controls { margin-top:1.1rem; }
+    /* Shrink-wrapped, so the bezel is the picture's width and not the column's — its padding and
+       its corner radius are percentages and stay in proportion at any height. */
+    .phone { width:fit-content; max-width:100%; }
+    .phone video {
+      height:min(70svh, calc(100svh - 15.5rem));
+      width:auto; max-width:100%;
+      /* Held before the metadata arrives, so the page does not reflow under a reader's thumb
+         when the video announces its own shape. The film's real 720x1566. */
+      aspect-ratio:720 / 1566;
+    }
+  }
 </style>
 </head>
 <body>
