@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# One page per shared waypoint, generated from a deep link. Nothing to rank, and endless URLs.
+Disallow: /place/
+
+Sitemap: https://corridor-trails.com/sitemap.xml

@@ -3,18 +3,25 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Corridor — offline maps for thru-hikers</title>
-<meta name="description" content="The map and the elevation profile on one screen, and every trail's whole topographic map on your phone. Te Araroa, the Great Divide Trail and the Pacific Crest Trail. Free, no account, works in airplane mode.">
+<title>Corridor — thru-hiking navigation app with offline maps</title>
+<meta name="description" content="Made by thru-hikers for thru-hikers. Corridor is a thru-hiking navigation app hand-tailored to what we need on trail — offline maps, free, no account.">
+<link rel="canonical" href="https://corridor-trails.com/">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
 <link rel="icon" href="favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="theme-color" content="#FBFAF7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#101314" media="(prefers-color-scheme: dark)">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://corridor-trails.com/">
-<meta property="og:title" content="Corridor — offline maps for thru-hikers">
-<meta property="og:description" content="Map and elevation profile on one screen. Every trail's whole topographic map, offline. Free.">
+<meta property="og:site_name" content="Corridor">
+<meta property="og:title" content="Corridor — thru-hiking navigation app with offline maps">
+<meta property="og:description" content="Made by thru-hikers for thru-hikers. Corridor is a thru-hiking navigation app hand-tailored to what we need on trail — offline maps, free, no account.">
 <meta property="og:image" content="https://corridor-trails.com/demo/poster.webp">
+<meta property="og:image:alt" content="Corridor on an iPhone: the topographic map above, the elevation profile below, in sync.">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Corridor — thru-hiking navigation app with offline maps">
+<meta name="twitter:description" content="Made by thru-hikers for thru-hikers. Corridor is a thru-hiking navigation app hand-tailored to what we need on trail — offline maps, free, no account.">
+<meta name="twitter:image" content="https://corridor-trails.com/demo/poster.webp">
 <style>
   :root {
     --paper:#FBFAF7; --card:#FFFFFF; --ink:#1C1F21; --faint:#6B7276; --hair:#DBD8D2;
@@ -186,6 +193,12 @@
     font-size:clamp(1.6rem,4.5vw,2.1rem); font-weight:600; letter-spacing:-.02em;
     margin:0 0 .4rem; text-align:center; text-wrap:balance;
   }
+  /* Sits between the h2 and the list, so the list loses a little of its own top margin. */
+  .section-lede {
+    max-width:34rem; margin:.6rem auto 0; text-align:center; color:var(--faint);
+    font-size:1.02rem; text-wrap:pretty;
+  }
+  .section-lede + .answers { margin-top:1.8rem; }
   .answers { list-style:none; padding:0; margin:2.2rem auto 0; max-width:44rem; }
   .answers li { padding:1.05rem 0; border-bottom:1px solid var(--hair); text-wrap:pretty; }
   .answers li:first-child { border-top:1px solid var(--hair); }
@@ -250,6 +263,76 @@
     }
   }
 </style>
+
+<!-- Structured data. Google guesses a date for the snippet when a page gives it none, and it
+     guessed a stale one; dateModified below gives it a real one to use instead. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "MobileApplication",
+      "@id": "https://corridor-trails.com/#app",
+      "name": "Corridor",
+      "alternateName": "Corridor Trails",
+      "applicationCategory": "TravelApplication",
+      "applicationSubCategory": "Thru-hiking navigation",
+      "operatingSystem": "iOS 18",
+      "url": "https://corridor-trails.com/",
+      "installUrl": "https://testflight.apple.com/join/bbzZA5uk",
+      "image": "https://corridor-trails.com/img/icon.webp",
+      "screenshot": "https://corridor-trails.com/demo/poster.webp",
+      "description": "A thru-hiking navigation app made by thru-hikers. The topographic map and the elevation profile stay in sync on one screen, every trail's whole map works offline in airplane mode, and hikers' own water reports tell you what the next source is doing right now. Te Araroa, the Great Divide Trail and the Pacific Crest Trail.",
+      "featureList": [
+        "Offline topographic maps for the whole trail, no signal needed",
+        "Map and elevation profile in sync on one screen",
+        "Hiker-reported water sources: full, low or dry",
+        "Section planner with permits, closures, crossings and water carries",
+        "Custom alternates you draw yourself, with full elevation profile",
+        "Wrong-turn push notification",
+        "Shortest walk out to a road from anywhere",
+        "Offline sunrise and sunset",
+        "Battery-saving mode"
+      ],
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "isAccessibleForFree": true,
+      "author": { "@id": "https://corridor-trails.com/#author" },
+      "publisher": { "@id": "https://corridor-trails.com/#org" }
+    },
+    {
+      "@type": "Person",
+      "@id": "https://corridor-trails.com/#author",
+      "name": "Pez",
+      "description": "Thru-hiker from Switzerland and the maker of Corridor."
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://corridor-trails.com/#org",
+      "name": "Corridor",
+      "url": "https://corridor-trails.com/",
+      "logo": "https://corridor-trails.com/img/icon.webp"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://corridor-trails.com/#website",
+      "url": "https://corridor-trails.com/",
+      "name": "Corridor",
+      "inLanguage": "en",
+      "publisher": { "@id": "https://corridor-trails.com/#org" }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://corridor-trails.com/#webpage",
+      "url": "https://corridor-trails.com/",
+      "name": "Corridor \u2014 thru-hiking navigation app with offline maps",
+      "isPartOf": { "@id": "https://corridor-trails.com/#website" },
+      "about": { "@id": "https://corridor-trails.com/#app" },
+      "dateModified": "2026-08-27T14:56:40Z",
+      "description": "Made by thru-hikers for thru-hikers. Corridor is a thru-hiking navigation app hand-tailored to what we need on trail — offline maps, free, no account."
+    }
+  ]
+}
+</script>
 </head>
 <body>
 
@@ -257,9 +340,9 @@
   <div class="wrap">
     <img class="icon" src="img/icon.webp" width="92" height="92" alt="The Corridor app icon: a trail line through a corridor of ground, with a red dot on it.">
     <h1>Corridor</h1>
-    <p class="tagline">Offline maps for thru-hikers</p>
-    <p class="lede">Made by thru-hikers for thru-hikers, this app is hand tailored to what we need
-    on trail.</p>
+    <p class="tagline">Thru-hiking navigation — offline maps for the whole trail</p>
+    <p class="lede">Made by thru-hikers for thru-hikers. This app is hand-tailored to what we
+    need on trail — on Te Araroa, the Great Divide Trail and the Pacific Crest Trail.</p>
 
     <a class="cta cta-beta" href="https://testflight.apple.com/join/bbzZA5uk" target="_blank" rel="noopener">
       Participate in beta testing NOW
@@ -317,6 +400,8 @@
 <section class="plain">
   <div class="wrap">
     <h2>Batteries included</h2>
+    <p class="section-lede">Everything a thru-hiking navigation app has to do on a long trail,
+    and the things we kept wishing ours would.</p>
     <ul class="answers">
       <li><b>Missing a trail?</b> — I've built the entire trail-creation process fully
       automated. All I need as input is the trail's name and a GPX file — that's it.
