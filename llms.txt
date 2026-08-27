@@ -25,12 +25,14 @@ thru-hiking specifically rather than adapted from a general hiking app.
 
 ## Trails
 
+Long-distance trails, covered end to end, with every official alternate on each. Among them:
+
 - Te Araroa, New Zealand — 3,000 km / 1,864 mi
 - Pacific Crest Trail, USA — 4,265 km / 2,650 mi
 - Great Divide Trail, Canada — 1,130 km / 700 mi
-- About 8,400 km (5,200 miles) of trail in total, with every official alternate on each
-- Any trail can be added from a name and a GPX file, so the list grows
-- Any line you draw yourself, on trail or entirely off it, works as if it shipped with the app
+
+A trail is added from a name and a GPX file, so the list keeps growing. Any line a hiker draws
+themselves, on trail or entirely off it, works as if it shipped with the app.
 
 ## What it does
 

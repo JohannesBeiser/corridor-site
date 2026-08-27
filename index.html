@@ -205,11 +205,24 @@
   .answers b { font-weight:600; }
   .answers .aside { display:block; margin-top:.35rem; font-size:.72rem; color:var(--faint); }
 
-  /* Same rhythm as .answers, but a dl — the question is the thing being marked up, not a bullet. */
-  .faq { margin:2.2rem auto 0; max-width:44rem; border-top:1px solid var(--hair); }
-  .faq dt { font-weight:600; padding:1.05rem 0 .2rem; }
-  .faq dd { margin:0; padding:0 0 1.05rem; color:var(--faint); border-bottom:1px solid var(--hair);
-            text-wrap:pretty; }
+  /* Collapsed by default: the answers are in the HTML and indexed, and the section costs one
+     screen instead of six. A summary row is its own hit target, so the padding lives there. */
+  .faq-list { margin:2.2rem auto 0; max-width:44rem; border-top:1px solid var(--hair); }
+  .faq { border-bottom:1px solid var(--hair); }
+  .faq > summary {
+    font-weight:600; padding:1.05rem 1.6rem 1.05rem 0; cursor:pointer; position:relative;
+    list-style:none; text-wrap:pretty;
+  }
+  .faq > summary::-webkit-details-marker { display:none; }
+  /* A chevron drawn in CSS rather than a glyph, so it rotates rather than swapping character. */
+  .faq > summary::after {
+    content:""; position:absolute; right:.2rem; top:1.5rem; width:.5rem; height:.5rem;
+    border-right:2px solid var(--faint); border-bottom:2px solid var(--faint);
+    transform:rotate(45deg); transform-origin:center; transition:transform .18s ease;
+  }
+  .faq[open] > summary::after { transform:rotate(-135deg); }
+  .faq > summary:hover { color:var(--you); }
+  .faq-body { padding:0 0 1.15rem; color:var(--faint); text-wrap:pretty; }
 
   section.closing { padding:5rem 0 3.5rem; text-align:center; }
   section.closing h2 { margin-bottom:1.4rem; font-size:clamp(1.6rem,4.5vw,2.1rem);
@@ -288,7 +301,7 @@
       "installUrl": "https://testflight.apple.com/join/bbzZA5uk",
       "image": "https://corridor-trails.com/img/icon.webp",
       "screenshot": "https://corridor-trails.com/demo/poster.webp",
-      "description": "Corridor is an offline navigation app for thru-hikers, made by thru-hikers. It covers long-distance trails end to end, works entirely without a signal, and is free to use. Long trails ask different questions than day hikes do: where the next reliable water is, how much climbing is left before camp, what the next section demands of you, what an alternate costs you, and how you would get off trail if you had to. Corridor is built around those decisions. The topographic map and the elevation profile sit on one screen and stay in sync. Water sources carry reports from the hikers ahead of you — full, low or dry — and you can mark them yourself in two taps for the hikers behind you. The section planner shows what is in a section before you walk in: long water carries, permits, bear-can rules, reservations, river crossings, re-routes and closures. Nothing is streamed: every trail downloads a 90 km topographic corridor along the route plus a wider coarse road map around it for under 5 MB more, so towns, side roads and exits stay visible well off trail in airplane mode. At launch it covers Te Araroa (3,000 km / 1,864 mi), the Pacific Crest Trail (4,265 km / 2,650 mi) and the Great Divide Trail (1,130 km / 700 mi) — around 8,400 km of trail, including every official alternate. Adding a trail requires only a name and a GPX file. Maps are built from OpenStreetMap with NASA SRTM and EU Copernicus elevation, rendered in a topographic style developed for this app, then reviewed by hand, mile by mile, once a year. Free, with no account, no subscription and no ads. iPhone, iOS 18 and later.",
+      "description": "Corridor is an offline navigation app for thru-hikers, made by thru-hikers. It covers long-distance trails end to end, works entirely without a signal, and is free to use. Long trails ask different questions than day hikes do: where the next reliable water is, how much climbing is left before camp, what the next section demands of you, what an alternate costs you, and how you would get off trail if you had to. Corridor is built around those decisions. The topographic map and the elevation profile sit on one screen and stay in sync. Water sources carry reports from the hikers ahead of you — full, low or dry — and you can mark them yourself in two taps for the hikers behind you. The section planner shows what is in a section before you walk in: long water carries, permits, bear-can rules, reservations, river crossings, re-routes and closures. Nothing is streamed: every trail downloads a 90 km topographic corridor along the route plus a wider coarse road map around it for under 5 MB more, so towns, side roads and exits stay visible well off trail in airplane mode. It covers long-distance trails end to end, including Te Araroa (3,000 km / 1,864 mi), the Pacific Crest Trail (4,265 km / 2,650 mi) and the Great Divide Trail (1,130 km / 700 mi), with every official alternate. Adding a trail requires only a name and a GPX file. Maps are built from OpenStreetMap with NASA SRTM and EU Copernicus elevation, rendered in a topographic style developed for this app, then reviewed by hand, mile by mile, once a year. Free, with no account, no subscription and no ads. iPhone, iOS 18 and later.",
       "featureList": [
         "Topographic map and elevation profile on one screen, in sync",
         "Water sources with reports from other hikers — full, low or dry — markable in two taps",
@@ -449,7 +462,7 @@
           "name": "Which trails does it cover?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Three, at launch: Te Araroa (3,000 km / 1,864 mi), the Pacific Crest Trail (4,265 km / 2,650 mi) and the Great Divide Trail (1,130 km / 700 mi) — about 8,400 km (5,200 miles) of trail, with every official alternate. Adding a trail takes a name and a GPX file, so the list grows, and you can draw any line anywhere yourself and use it as if it shipped with the app."
+            "text": "Long-distance trails, end to end, with every official alternate on each — Te Araroa (3,000 km / 1,864 mi), the Pacific Crest Trail (4,265 km / 2,650 mi) and the Great Divide Trail (1,130 km / 700 mi) among them. Adding a trail takes only a name and a GPX file, so the list keeps growing, and you can draw any line anywhere yourself and use it as if it shipped with the app."
           }
         },
         {
@@ -680,24 +693,32 @@
 <section class="plain" id="faq">
   <div class="wrap">
     <h2>Questions people ask before downloading</h2>
-    <dl class="faq">
-      <dt>What is Corridor?</dt>
-      <dd>Corridor is a free offline navigation app for thru-hikers, built by a thru-hiker. The topographic map and the elevation profile sit on one screen and stay in sync, and the whole trail is already on the phone before you start walking. iPhone, iOS 18 and later.</dd>
-      <dt>Which trails does it cover?</dt>
-      <dd>Three, at launch: Te Araroa (3,000 km / 1,864 mi), the Pacific Crest Trail (4,265 km / 2,650 mi) and the Great Divide Trail (1,130 km / 700 mi) — about 8,400 km (5,200 miles) of trail, with every official alternate. Adding a trail takes a name and a GPX file, so the list grows, and you can draw any line anywhere yourself and use it as if it shipped with the app.</dd>
-      <dt>Does it work with no signal?</dt>
-      <dd>Yes. Every map is on the phone, not streamed. Each trail ships with a 90 km corridor of topographic detail plus a coarse 200-mile-wide road map around it, so you can still see where you are and how you would walk out, in airplane mode, in a canyon, on day nine.</dd>
-      <dt>What does it cost?</dt>
-      <dd>Nothing. No account, no subscription, no trial. The app launches on 25 October 2026 and the TestFlight beta is open now.</dd>
-      <dt>What does it do that a general hiking app does not?</dt>
-      <dd>It only does long trails, so it can answer the questions a thru-hiker actually has: how far to the next water and whether another hiker found it dry, what the next section asks of you, what an alternate costs you in climbing, and the shortest walk out to a road if you get hurt.</dd>
-      <dt>Where do the maps come from?</dt>
-      <dd>Trail and terrain data from <a href="https://www.openstreetmap.org/">OpenStreetMap</a>
-      contributors and elevation from NASA <a href="https://www.earthdata.nasa.gov/data/instruments/srtm">SRTM</a>
-      and the EU <a href="https://www.copernicus.eu/">Copernicus</a> programme, rendered into a topographic
-      style built for this app and then reviewed by hand, mile by mile, once a year. Full credits are on the
-      <a href="licences.html">licensing page</a>.</dd>
-    </dl>
+    <div class="faq-list">
+      <details class="faq">
+        <summary>What is Corridor?</summary>
+        <div class="faq-body">Corridor is a free offline navigation app for thru-hikers, built by a thru-hiker. The topographic map and the elevation profile sit on one screen and stay in sync, and the whole trail is already on the phone before you start walking. iPhone, iOS 18 and later.</div>
+      </details>
+      <details class="faq">
+        <summary>Which trails does it cover?</summary>
+        <div class="faq-body">Long-distance trails, end to end, with every official alternate on each — Te Araroa (3,000 km / 1,864 mi), the Pacific Crest Trail (4,265 km / 2,650 mi) and the Great Divide Trail (1,130 km / 700 mi) among them. Adding a trail takes only a name and a GPX file, so the list keeps growing, and you can draw any line anywhere yourself and use it as if it shipped with the app.</div>
+      </details>
+      <details class="faq">
+        <summary>Does it work with no signal?</summary>
+        <div class="faq-body">Yes. Every map is on the phone, not streamed. Each trail ships with a 90 km corridor of topographic detail plus a coarse 200-mile-wide road map around it, so you can still see where you are and how you would walk out, in airplane mode, in a canyon, on day nine.</div>
+      </details>
+      <details class="faq">
+        <summary>What does it cost?</summary>
+        <div class="faq-body">Nothing. No account, no subscription, no trial. The app launches on 25 October 2026 and the TestFlight beta is open now.</div>
+      </details>
+      <details class="faq">
+        <summary>What does it do that a general hiking app does not?</summary>
+        <div class="faq-body">It only does long trails, so it can answer the questions a thru-hiker actually has: how far to the next water and whether another hiker found it dry, what the next section asks of you, what an alternate costs you in climbing, and the shortest walk out to a road if you get hurt.</div>
+      </details>
+      <details class="faq">
+        <summary>Where do the maps come from?</summary>
+        <div class="faq-body">Trail and terrain data from <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors and elevation from NASA <a href="https://www.earthdata.nasa.gov/data/instruments/srtm">SRTM</a> and the EU <a href="https://www.copernicus.eu/">Copernicus</a> programme, rendered into a topographic style built for this app and then reviewed by hand, mile by mile, once a year. Full credits are on the <a href="licences.html">licensing page</a>.</div>
+      </details>
+    </div>
   </div>
 </section>
 <section class="closing">
