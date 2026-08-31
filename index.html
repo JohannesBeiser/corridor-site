@@ -205,25 +205,6 @@
   .answers b { font-weight:600; }
   .answers .aside { display:block; margin-top:.35rem; font-size:.72rem; color:var(--faint); }
 
-  /* Collapsed by default: the answers are in the HTML and indexed, and the section costs one
-     screen instead of six. A summary row is its own hit target, so the padding lives there. */
-  .faq-list { margin:2.2rem auto 0; max-width:44rem; border-top:1px solid var(--hair); }
-  .faq { border-bottom:1px solid var(--hair); }
-  .faq > summary {
-    font-weight:600; padding:1.05rem 1.6rem 1.05rem 0; cursor:pointer; position:relative;
-    list-style:none; text-wrap:pretty;
-  }
-  .faq > summary::-webkit-details-marker { display:none; }
-  /* A chevron drawn in CSS rather than a glyph, so it rotates rather than swapping character. */
-  .faq > summary::after {
-    content:""; position:absolute; right:.2rem; top:1.5rem; width:.5rem; height:.5rem;
-    border-right:2px solid var(--faint); border-bottom:2px solid var(--faint);
-    transform:rotate(45deg); transform-origin:center; transition:transform .18s ease;
-  }
-  .faq[open] > summary::after { transform:rotate(-135deg); }
-  .faq > summary:hover { color:var(--you); }
-  .faq-body { padding:0 0 1.15rem; color:var(--faint); text-wrap:pretty; }
-
   section.closing { padding:5rem 0 3.5rem; text-align:center; }
   section.closing h2 { margin-bottom:1.4rem; font-size:clamp(1.6rem,4.5vw,2.1rem);
                        font-weight:600; letter-spacing:-.02em; }
@@ -443,72 +424,15 @@
       }
     },
     {
-      "@type": "FAQPage",
-      "@id": "https://corridor-trails.com/#faq",
-      "isPartOf": {
-        "@id": "https://corridor-trails.com/#website"
-      },
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "What is Corridor?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Corridor is a free offline navigation app for thru-hikers, built by a thru-hiker. The topographic map and the elevation profile sit on one screen and stay in sync, and the whole trail is already on the phone before you start walking. iPhone, iOS 18 and later."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Which trails does it cover?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Long-distance trails, end to end, with every official alternate on each — Te Araroa (3,000 km / 1,864 mi), the Pacific Crest Trail (4,265 km / 2,650 mi) and the Great Divide Trail (1,130 km / 700 mi) among them. Adding a trail takes only a name and a GPX file, so the list keeps growing, and you can draw any line anywhere yourself and use it as if it shipped with the app."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Does it work with no signal?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Every map is on the phone, not streamed. Each trail ships with a 90 km corridor of topographic detail plus a coarse 200-mile-wide road map around it, so you can still see where you are and how you would walk out, in airplane mode, in a canyon, on day nine."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "What does it cost?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Nothing. No account, no subscription, no trial. The app launches on 25 October 2026 and the TestFlight beta is open now."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "What does it do that a general hiking app does not?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "It only does long trails, so it can answer the questions a thru-hiker actually has: how far to the next water and whether another hiker found it dry, what the next section asks of you, what an alternate costs you in climbing, and the shortest walk out to a road if you get hurt."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Where do the maps come from?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Trail and terrain data from OpenStreetMap contributors and elevation from NASA SRTM and the EU Copernicus programme, rendered into a topographic style built for this app and then reviewed by hand, mile by mile, once a year."
-          }
-        }
-      ]
-    },
-    {
       "@type": "VideoObject",
       "@id": "https://corridor-trails.com/#tour",
       "name": "A walk through Corridor on the Great Divide Trail",
-      "description": "A 93-second tour of Corridor, the offline navigation app for thru-hikers: the topographic map and elevation profile in sync on one screen, your progress for the day, any place on the trail in 3D, trail information and alternates, re-routing through an alternate, the section planner, and the whole offline map — a 90 km corridor around the trail with the road map inside it.",
+      "description": "A 92-second tour of Corridor, the offline navigation app for thru-hikers: the topographic map and elevation profile in sync on one screen, your progress for the day, searching the trail and looking at any place on it in 3D, the whole offline map — a 90 km corridor around the trail with the road map inside it — trail information and alternates, re-routing through an alternate, and the section planner.",
       "thumbnailUrl": "https://corridor-trails.com/demo/poster.webp",
       "contentUrl": "https://corridor-trails.com/demo/gdt-tour.mp4",
       "embedUrl": "https://corridor-trails.com/#see-it",
-      "uploadDate": "2026-08-25",
-      "duration": "PT1M33S",
+      "uploadDate": "2026-08-31",
+      "duration": "PT1M32S",
       "inLanguage": "en",
       "isFamilyFriendly": true,
       "about": {
@@ -689,38 +613,6 @@
     </ul>
   </div>
 </section>
-
-<section class="plain" id="faq">
-  <div class="wrap">
-    <h2>Questions people ask before downloading</h2>
-    <div class="faq-list">
-      <details class="faq">
-        <summary>What is Corridor?</summary>
-        <div class="faq-body">Corridor is a free offline navigation app for thru-hikers, built by a thru-hiker. The topographic map and the elevation profile sit on one screen and stay in sync, and the whole trail is already on the phone before you start walking. iPhone, iOS 18 and later.</div>
-      </details>
-      <details class="faq">
-        <summary>Which trails does it cover?</summary>
-        <div class="faq-body">Long-distance trails, end to end, with every official alternate on each — Te Araroa (3,000 km / 1,864 mi), the Pacific Crest Trail (4,265 km / 2,650 mi) and the Great Divide Trail (1,130 km / 700 mi) among them. Adding a trail takes only a name and a GPX file, so the list keeps growing, and you can draw any line anywhere yourself and use it as if it shipped with the app.</div>
-      </details>
-      <details class="faq">
-        <summary>Does it work with no signal?</summary>
-        <div class="faq-body">Yes. Every map is on the phone, not streamed. Each trail ships with a 90 km corridor of topographic detail plus a coarse 200-mile-wide road map around it, so you can still see where you are and how you would walk out, in airplane mode, in a canyon, on day nine.</div>
-      </details>
-      <details class="faq">
-        <summary>What does it cost?</summary>
-        <div class="faq-body">Nothing. No account, no subscription, no trial. The app launches on 25 October 2026 and the TestFlight beta is open now.</div>
-      </details>
-      <details class="faq">
-        <summary>What does it do that a general hiking app does not?</summary>
-        <div class="faq-body">It only does long trails, so it can answer the questions a thru-hiker actually has: how far to the next water and whether another hiker found it dry, what the next section asks of you, what an alternate costs you in climbing, and the shortest walk out to a road if you get hurt.</div>
-      </details>
-      <details class="faq">
-        <summary>Where do the maps come from?</summary>
-        <div class="faq-body">Trail and terrain data from <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors and elevation from NASA <a href="https://www.earthdata.nasa.gov/data/instruments/srtm">SRTM</a> and the EU <a href="https://www.copernicus.eu/">Copernicus</a> programme, rendered into a topographic style built for this app and then reviewed by hand, mile by mile, once a year. Full credits are on the <a href="licences.html">licensing page</a>.</div>
-      </details>
-    </div>
-  </div>
-</section>
 <section class="closing">
   <div class="wrap">
     <h2>Get it on your phone</h2>
@@ -751,7 +643,7 @@
 <!-- Written by Tools/publish-demo.py straight out of the take that produced the video, so the
      words beside the phone cannot drift from what the phone is doing. Do not edit by hand. -->
 <script id="demo-timeline" type="application/json">
-{"path": "gdt-tour", "durationSeconds": 92.739, "beats": [{"id": "one-screen", "start": 0.001, "end": 13.614, "title": "Everything on one screen.", "body": "The map and the elevation profile stay in sync. The map is a corridor along the trail — up is ahead, down is behind."}, {"id": "your-day", "start": 13.614, "end": 19.921, "title": "Your day", "body": "See your progress towards your destination in the top area."}, {"id": "three-d", "start": 19.921, "end": 37.721, "title": "Look at any place in 3D", "body": "See what the trail and its surroundings actually look like, so you know the ground before you walk it."}, {"id": "trail-info", "start": 37.721, "end": 46.416, "title": "Trail information", "body": "Read what this trail asks of you before you start — and see every alternate there is."}, {"id": "alternate", "start": 46.416, "end": 59.421, "title": "Choose an alternate", "body": "Re-route through any alternate and the whole trail adjusts itself around it."}, {"id": "planner", "start": 59.421, "end": 69.893, "title": "Section planner", "body": "Plan your next section or the whole trail, and see what is in it before you walk in — long water carries, bear-can rules, reservations, dangerous crossings, re-routes and closures."}, {"id": "offline-map", "start": 69.893, "end": 86.594, "title": "A huge offline map", "body": "A 90 km corridor around the trail, with the road map inside it — so you can always see where you are and how you would get out. Everything on screen is already on the phone: none of it needs a signal."}, {"id": "all-trails", "start": 86.597, "end": 92.739, "title": "All major trails — free, for ever", "body": "Hi, I'm Pez! I'm a Thru-Hiker from Switzerland and on all my trails I've dreamt about making this app. An app that is completely hand-tailored to the needs we have on trail.", "image": "img/pez.webp", "imageAlt": "Pez standing on a rock at the edge of a turquoise glacial lake, looking up at a snow-streaked rock wall."}]}
+{"path": "gdt-tour", "durationSeconds": 91.547, "beats": [{"id": "one-screen", "start": 0.001, "end": 9.252, "title": "Everything on one screen.", "body": "The map and the elevation profile stay in sync. The map is a corridor along the trail — up is ahead, down is behind."}, {"id": "your-day", "start": 9.252, "end": 15.558, "title": "Your day", "body": "See your progress towards your destination in the top area."}, {"id": "three-d", "start": 15.558, "end": 41.964, "title": "Look at any place in 3D", "body": "Search for anywhere on the trail, then draw a circle around it and turn the ground — so you know what it actually looks like before you walk it."}, {"id": "offline-map", "start": 41.965, "end": 47.945, "title": "A huge offline map", "body": "A 90 km corridor around the trail, with the road map inside it — so you can always see where you are and how you would get out. Everything on screen is already on the phone: none of it needs a signal."}, {"id": "trail-info", "start": 47.945, "end": 56.403, "title": "Trail information", "body": "Read what this trail asks of you before you start — and see every alternate there is."}, {"id": "alternate", "start": 56.404, "end": 69.239, "title": "Choose an alternate", "body": "Re-route through any alternate and the whole trail adjusts itself around it."}, {"id": "planner", "start": 69.239, "end": 79.655, "title": "Section planner", "body": "Plan your next section or the whole trail, and see what is in it before you walk in — long water carries, bear-can rules, reservations, dangerous crossings, re-routes and closures."}, {"id": "all-trails", "start": 79.655, "end": 91.547, "title": "All major trails — free, for ever", "body": "Hi, I'm Pez! I'm a Thru-Hiker from Switzerland and on all my trails I've dreamt about making this app. An app that is completely hand-tailored to the needs we have on trail.", "image": "img/pez.webp", "imageAlt": "Pez standing on a rock at the edge of a turquoise glacial lake, looking up at a snow-streaked rock wall."}]}
 </script>
 
 <script>
