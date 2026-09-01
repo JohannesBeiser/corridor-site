@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Corridor — Feedback survey</title>
+<meta name="robots" content="noindex">
+<!-- A redirect, and the reason it exists rather than the PostHog URL being pasted
+     directly: this link goes into TestFlight release notes, and a release note cannot be
+     edited once the build has gone out. The survey behind it can be replaced, renamed or
+     re-created; corridor-trails.com/survey stays the thing that was written down. -->
+<meta http-equiv="refresh" content="0; url=https://eu.posthog.com/external_surveys/01a05d05-123f-0000-13aa-2347759e457f">
+<link rel="canonical" href="https://corridor-trails.com/survey/">
+<style>
+  :root { --ink:#1C1F21; --faint:#6B7276; --paper:#FBFAF7; --you:#B0384A; }
+  @media (prefers-color-scheme: dark) {
+    :root { --ink:#E6E8E9; --faint:#9AA1A5; --paper:#101314; --you:#D4697A; }
+  }
+  html { background: var(--paper); }
+  body {
+    font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+    color: var(--ink); background: var(--paper);
+    max-width: 30rem; margin: 0 auto; padding: 6rem 1.25rem;
+    line-height: 1.6; font-size: 17px;
+  }
+  p { margin: 0 0 1rem; }
+  a { color: var(--you); }
+  .faint { color: var(--faint); font-size: .95rem; }
+</style>
+</head>
+<body>
+<p>Taking you to the Corridor feedback survey&hellip;</p>
+<p class="faint">If nothing happens,
+<a href="https://eu.posthog.com/external_surveys/01a05d05-123f-0000-13aa-2347759e457f">open it here</a>.</p>
+<script>
+  location.replace("https://eu.posthog.com/external_surveys/01a05d05-123f-0000-13aa-2347759e457f");
+</script>
+</body>
+</html>
