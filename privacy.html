@@ -119,6 +119,11 @@ into anyway.</p>
 <p>This needs a cookie, and the honest reason is that without one every page you open counts as a
 new stranger and <em>how long did somebody stay</em> cannot be answered at all. The cookie holds a
 random code and nothing else. It is not shared, not sold, and never used for advertising.</p>
+<p>Those requests do not go straight to PostHog. They go to <code>e.corridor-trails.com</code>, a
+subdomain of this site, and on to PostHog from there &mdash; because a browser extension that
+blocks <code>posthog.com</code> by name otherwise deletes a fifth of the numbers without telling
+anybody. That routing is done by <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare</a>,
+who already hand out the map packs the app downloads.</p>
 <p>If your browser sends <em>Do Not Track</em>, none of it runs. Blocking the script blocks all of
 it too, and the site works exactly the same either way.</p>
 
