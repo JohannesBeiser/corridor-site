@@ -114,15 +114,80 @@
 
   /* The bezel is drawn here rather than filmed: a simulator records the screen and nothing
      round it, and a frame in CSS stays sharp at any size, follows the theme, and costs no bytes. */
+  /* The phone and the tabs above it are one grid child now, not two, so `justify-items:center`
+     still has a single thing to centre and the tabs cannot drift away from the bezel they
+     belong to. A flex column rather than a block, because on a narrow page the bezel is sized by
+     its own height and is then narrower than this column — `align-items:center` is what keeps
+     the two lined up when they are not the same width. */
+  .phone-column {
+    display:flex; flex-direction:column; align-items:center;
+    width:100%; max-width:344px;
+  }
   .phone {
     position:relative; width:100%; max-width:344px; background:var(--bezel);
     border-radius:min(13.5%, 46px); padding:min(2.6%, 9px);
     box-shadow:0 2px 8px rgba(0,0,0,.18), 0 26px 60px rgba(0,0,0,.28);
   }
-  .phone video {
-    display:block; width:100%; height:auto; border-radius:min(11.5%, 38px);
-    background:var(--wash);
+  /* **Three films in one bezel, and switching between them is only a question of which one is
+     on top.** The tabs above the phone pick the take shot in the app's own colours, the one shot
+     in dark mode and the one shot in mosquito mode; all three are the same walk down the same
+     path, so they share a clock. The default take is the one the panels and the ticks are read
+     off and the other two are seeked to its time and left running underneath at zero opacity —
+     which is the whole of why the switch has no gap in it. Nothing is fetched, decoded or sought
+     at the moment somebody presses a tab, because the frame they are about to see is already
+     being drawn behind the one they are looking at.
+
+     `.screen` exists because a stack needs a box: three absolutely positioned videos have no
+     height of their own, so the bezel would close up around nothing. It carries the aspect the
+     videos used to carry themselves, and the loop's own dissolve now rides on it rather than on
+     one of the three. */
+  .phone .screen {
+    position:relative; display:block; width:100%; aspect-ratio:720 / 1566;
+    border-radius:min(11.5%, 38px); overflow:hidden; background:var(--wash);
     transition:opacity .35s linear;
+  }
+  .phone video {
+    position:absolute; inset:0; display:block; width:100%; height:100%;
+    object-fit:cover; opacity:0; transition:opacity .18s linear;
+  }
+  /* Short, and it is a dissolve rather than a cut on purpose: the two frames are the same
+     picture in two palettes, so a fade reads as the app changing its mind and a hard cut reads
+     as a dropped frame. The default take carries `on` in the markup, which is what a reader with
+     no JavaScript sees — the tabs are hidden from them and this is the film they always had. */
+  .phone video.on { opacity:1; }
+
+  /* ---- the three modes ---- */
+  /* Above the phone, in the phone's own column, and no wider than the bezel — a segmented
+     control the width of the page would be a page control rather than a control for the thing
+     under it. Hidden until the script says otherwise: without JavaScript there is one film and
+     nothing to choose between. */
+  .modes[hidden] { display:none; }
+  /* **Not clamped to the phone's width, and centred over it rather than pinned to its left.**
+     Three names and three marks come out a few pixels wider than a 344 px bezel; held to the
+     bezel's width the row cannot shrink — the labels do not wrap — so it hung off the right and
+     read as misaligned. Wider than the thing it belongs to, centred, is the honest version. */
+  .modes {
+    display:flex; flex-wrap:nowrap; gap:2px; margin:0 auto .9rem; padding:3px; width:fit-content;
+    border:1px solid var(--hair); border-radius:100px; background:var(--wash);
+  }
+  .modes button {
+    display:inline-flex; align-items:center; gap:.34rem; border:0; background:none;
+    font-family:inherit; font-size:.8rem; font-weight:500; color:var(--faint);
+    padding:.4rem .75rem; border-radius:100px; cursor:pointer; white-space:nowrap;
+    transition:background .15s ease, color .15s ease;
+  }
+  .modes button:hover { color:var(--ink); }
+  .modes button[aria-selected="true"] {
+    background:var(--card); color:var(--ink);
+    box-shadow:0 1px 3px rgba(0,0,0,.12);
+  }
+  /* The marks are the app's own, redrawn: `moon` is the SF Symbol the Settings row uses and the
+     mosquito is `MosquitoMark` from `TrailApp/UI/SettingMarks.swift`, point for point, because
+     SF Symbols has `ant` and `ant` is not a mosquito. They are drawn in `currentColor` for the
+     same reason they are `muted` in the app — an icon here names a row, it does not colour it. */
+  .modes svg { width:14px; height:14px; flex:none; }
+  @media (max-width:26rem) {
+    .modes button { padding:.42rem .6rem; font-size:.76rem; }
   }
   /* A hairline of light along the top of the bezel, which is what stops a dark rounded
      rectangle on a dark page reading as a hole rather than as an object. */
@@ -213,7 +278,7 @@
   footer nav { display:flex; flex-wrap:wrap; justify-content:center; gap:.6rem 1.5rem; }
 
   /* **Last in the sheet on purpose, and it was not the first time.** A media query carries no
-     specificity of its own, so these rules only beat `.phone video { width:100%; height:auto }`
+     specificity of its own, so these rules only beat `.phone .screen { width:100% }`
      by coming after it. Written above that rule, as they were for one deploy, every line here
      that matters is silently overridden and the phone on a mobile page is exactly the size it
      always was — which is what it did, on the live site, looking for all the world like a cache. */
@@ -254,12 +319,13 @@
     /* Shrink-wrapped, so the bezel is the picture's width and not the column's — its padding and
        its corner radius are percentages and stay in proportion at any height. */
     .phone { width:fit-content; max-width:100%; }
-    .phone video {
-      height:min(70svh, calc(100svh - 15.5rem));
+    /* The stack is what is sized now, and the videos fill it. 18.4rem rather than 15.5: the row
+       of mode tabs is new furniture above the phone and is about 2.9rem of it, so a picture
+       measured against the old number would push the first beat's heading back under the fold —
+       which is the exact bug the paragraph above this one records. */
+    .phone .screen {
+      height:min(70svh, calc(100svh - 18.4rem));
       width:auto; max-width:100%;
-      /* Held before the metadata arrives, so the page does not reflow under a reader's thumb
-         when the video announces its own shape. The film's real 720x1566. */
-      aspect-ratio:720 / 1566;
     }
   }
 </style>
@@ -534,12 +600,59 @@
 
 <section class="film" id="see-it">
   <div class="wrap">
-    <div class="phone">
-      <video id="film" playsinline muted loop preload="metadata"
-             poster="demo/poster.webp"
-             aria-label="A walk through Corridor on the Great Divide Trail: scrolling the map, opening a campsite, drawing a piece of ground in 3D, taking an alternate and planning a section.">
-        <source src="demo/gdt-tour.mp4" type="video/mp4">
-      </video>
+    <div class="phone-column">
+      <!-- The three takes. Same path, same walk, three of the app's own colour schemes; the
+           marks are the app's, from TrailApp/UI/SettingMarks.swift and the Settings rows beside
+           them. Hidden until the script has a second film to switch to. -->
+      <div class="modes" id="modes" role="tablist" aria-label="Colour mode" hidden>
+        <button type="button" role="tab" data-mode="default" aria-selected="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+               stroke-linecap="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4.2"/>
+            <path d="M12 3.2v1.9M12 18.9v1.9M3.2 12h1.9M18.9 12h1.9M5.8 5.8l1.35 1.35M16.85 16.85l1.35 1.35M18.2 5.8l-1.35 1.35M7.15 16.85L5.8 18.2"/>
+          </svg>
+          Default
+        </button>
+        <button type="button" role="tab" data-mode="dark" aria-selected="false">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M20.6 15.1a9.1 9.1 0 0 1-11.7-11.7A9.1 9.1 0 1 0 20.6 15.1z"/>
+          </svg>
+          Dark mode
+        </button>
+        <button type="button" role="tab" data-mode="mosquito" aria-selected="false">
+          <!-- MosquitoMark, point for point: legs below the body, wings above it, the body and
+               its proboscis one unbroken diagonal through the middle. -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M10 14.6 7.5 19.5 4.5 21M12.4 14l-.4 6 2.6 1.8M14.8 13.2 18 19l3 1.2"
+                  stroke-width="1"/>
+            <path d="M10.4 11.6Q15 5.6 21 4M10.6 12.2Q15 8.4 19.5 8" stroke-width="1.05"/>
+            <path d="M9.8 13.4 18.8 10.2" stroke-width="2.4"/>
+            <circle cx="8.5" cy="14" r="1.9" fill="currentColor" stroke="none"/>
+            <path d="M7.4 14.8 1.6 17.6" stroke-width="1.4"/>
+          </svg>
+          Mosquito mode
+        </button>
+      </div>
+
+      <div class="phone">
+        <!-- One box, three films stacked in it. `#film` is the clock: the panels, the ticks and
+             the loop's dissolve are all read off it whichever take is on top, and the other two
+             are kept at its time. The variants carry no poster — they are never the first thing
+             on screen. -->
+        <div class="screen" id="screen">
+          <video id="film" class="on" playsinline muted loop preload="metadata"
+                 data-mode="default"
+                 poster="demo/poster.webp"
+                 aria-label="A walk through Corridor on the Great Divide Trail: scrolling the map, opening a campsite, drawing a piece of ground in 3D, taking an alternate and planning a section.">
+            <source src="demo/gdt-tour.mp4" type="video/mp4">
+          </video>
+          <video class="variant" playsinline muted loop preload="none" data-mode="dark"
+                 data-src="demo/gdt-tour-dark.mp4" aria-hidden="true" tabindex="-1"></video>
+          <video class="variant" playsinline muted loop preload="none" data-mode="mosquito"
+                 data-src="demo/gdt-tour-mosquito.mp4" aria-hidden="true" tabindex="-1"></video>
+        </div>
+      </div>
     </div>
 
     <div class="tour-text">
@@ -777,8 +890,13 @@
     // **The loop is a cut, and a cut from the section planner back to a hillside is jarring.**
     // Fading the last and first half-second turns it into a dissolve without needing two video
     // elements or any seeking.
+    // **On the stack rather than on the film.** There are three videos in the bezel now and
+    // each one's own opacity is which mode is showing; a dissolve written onto the visible one
+    // would fight the switch and would leave the other two at full brightness underneath. The
+    // box they sit in fades instead, which is the same picture and cannot collide.
     var into = Math.min(t, Math.max(0, last - t));
-    film.style.opacity = into < FADE ? String(0.25 + 0.75 * (into / FADE)) : '1';
+    var dissolve = into < FADE ? String(0.25 + 0.75 * (into / FADE)) : '1';
+    (document.getElementById('screen') || film).style.opacity = dissolve;
   });
 
   // Starts three seconds after the page has loaded, whether or not the phone is on screen yet,
@@ -799,6 +917,230 @@
   ['touchstart', 'scroll', 'click'].forEach(function (evt) {
     window.addEventListener(evt, start, { passive: true, once: true });
   });
+}());
+</script>
+
+<!-- **Where each variant take's beats fall**, written out of the same `*.timeline.json` the
+     recorder produces for the film beside the phone. The default take's own marks are in
+     `#demo-timeline` above; these are the other two, and the script maps one onto the other so a
+     switch lands in the same place in the same action rather than at the same number of seconds.
+     Three runs of one path on a simulator are 90.9 s, 91.6 s and 91.6 s long and the difference
+     does not accrue evenly, which is the whole reason this is here. Regenerate it with the films
+     — see README. -->
+<script id="demo-variants" type="application/json">
+{"dark": {"duration": 90.937, "marks": [0.001, 9.365, 15.625, 41.586, 47.499, 56.059, 69.113, 79.386, 90.936]}, "mosquito": {"duration": 91.586, "marks": [0.001, 9.194, 15.481, 42.415, 48.416, 57.064, 69.859, 80.057, 91.586]}}
+</script>
+
+<script>
+/* **The three modes, and why the switch has no seam in it.**
+
+   The app is one app in three sets of colours — its own, dark mode, and mosquito mode, which
+   draws everything on the red subpixel alone so the screen stops being the brightest thing in
+   camp. All three are worth seeing, and a still of each would say nothing: what they change is
+   how the map reads while it is moving.
+
+   So there are three takes of the same walk, shot from the same path file, and the tabs pick
+   between them. **The switch is a swap of which one is on top and nothing else.** Every take
+   that has been loaded is playing, in step with the one on screen, at zero opacity behind it —
+   so pressing a tab does not start, seek or fetch anything; the frame is already being drawn.
+   That is the whole design, and everything below is in service of it:
+
+   - `#film` is the clock. It is always the default take, it is never stopped, and the panels,
+     the ticks and the loop's dissolve are read off it whichever mode is showing.
+   - A variant is fetched once — on the first hint that somebody wants it, and otherwise quietly
+     a few seconds after the page has settled — and from then on it plays for good.
+   - Drift is corrected on `timeupdate`, which is also what carries a tick's seek across to the
+     other two: they are told the clock's time rather than asked to follow a click.
+   - A take that 404s or will not decode takes its own tab away with it, so a page shipped
+     before its films are copied over is the page it always was rather than a broken one.
+
+   9.7 MB a take, which is why the two variants are not in the markup as sources. On a metered
+   or a slow connection nothing is fetched until a tab is actually reached for. */
+(function () {
+  var film = document.getElementById('film');
+  var modeHost = document.getElementById('modes');
+  if (!film || !modeHost) { return; }
+
+  var timeline = document.getElementById('demo-timeline');
+  var data = timeline ? JSON.parse(timeline.textContent) : { beats: [] };
+  var variants = [].slice.call(document.querySelectorAll('.phone video.variant'));
+  if (!variants.length) { return; }
+  var all = [film].concat(variants);
+  var buttons = [].slice.call(modeHost.querySelectorAll('button'));
+  var current = 'default';
+  var wanted = 'default';
+
+  modeHost.hidden = false;
+
+  function byMode(mode) {
+    for (var i = 0; i < all.length; i++) { if (all[i].dataset.mode === mode) { return all[i]; } }
+    return null;
+  }
+
+  // Ready enough to be put on screen: it has the frame for the time it is about to be shown at.
+  function ready(v) { return v === film || (v.dataset.loaded === '1' && v.readyState >= 2); }
+
+  function show(mode) {
+    var v = byMode(mode);
+    if (!v || !ready(v)) { return; }
+    all.forEach(function (other) { other.classList.toggle('on', other === v); });
+    current = mode;
+  }
+
+  function select(mode) {
+    wanted = mode;
+    buttons.forEach(function (b) {
+      b.setAttribute('aria-selected', String(b.dataset.mode === mode));
+    });
+    load(mode);
+    show(mode);
+  }
+
+  // **Loaded once, then left running.** `play()` on a hidden video is what keeps it in step
+  // cheaply — a paused one would have to be sought and started at the moment of the switch,
+  // which is exactly the pause this is built to avoid.
+  function load(mode) {
+    var v = byMode(mode);
+    if (!v || v === film || v.dataset.started === '1') { return; }
+    v.dataset.started = '1';
+    v.addEventListener('error', function () { drop(v); });
+    // **`preload` has to be lifted before the source is set, and forgetting it deadlocks the
+    // whole thing.** The markup says `preload="none"` so that two 9 MB films are not fetched by
+    // every reader who never touches a tab — but the attribute keeps applying after `src` is
+    // assigned, so the element sits at metadata for ever, `loadeddata` never fires, the play
+    // that would have pulled the data in is inside that handler, and the tab quietly does
+    // nothing. Lifted here, and `play()` is called on the way in rather than only on the way
+    // out, so the fetch has two reasons to start.
+    v.preload = 'auto';
+    v.addEventListener('loadeddata', function () {
+      v.dataset.loaded = '1';
+      v.currentTime = translate(v.dataset.mode, film.currentTime);
+      var playing = v.play();
+      if (playing && playing.catch) { playing.catch(function () {}); }
+      // Whoever asked for this mode may have asked while it was still arriving.
+      if (wanted === v.dataset.mode) { show(v.dataset.mode); }
+    });
+    // A tab pressed while its take was still arriving, or while it was catching up from a
+    // tick's seek, is answered the moment it can be answered rather than at the next
+    // `timeupdate` — which is up to a quarter of a second of a tab that looks pressed and has
+    // done nothing.
+    ['canplay', 'seeked', 'playing'].forEach(function (evt) {
+      v.addEventListener(evt, function () {
+        if (wanted === v.dataset.mode) { show(v.dataset.mode); }
+      });
+    });
+    v.src = v.dataset.src;
+    v.load();
+    var kick = v.play();
+    if (kick && kick.catch) { kick.catch(function () {}); }
+  }
+
+  // A take that cannot be played is a tab that should not be there. The page falls back to the
+  // film it has always had rather than to an empty bezel.
+  function drop(v) {
+    var mode = v.dataset.mode;
+    buttons.forEach(function (b) { if (b.dataset.mode === mode) { b.remove(); } });
+    buttons = buttons.filter(function (b) { return b.dataset.mode !== mode; });
+    v.remove();
+    all = all.filter(function (other) { return other !== v; });
+    if (wanted === mode) { select('default'); }
+    if (buttons.length < 2) { modeHost.hidden = true; }
+  }
+
+  buttons.forEach(function (b) {
+    b.addEventListener('click', function () { select(b.dataset.mode); });
+    // Reaching for a tab is the cheapest warning anybody gives, and on a pointer it arrives
+    // hundreds of milliseconds before the press.
+    ['pointerenter', 'focus'].forEach(function (evt) {
+      b.addEventListener(evt, function () { load(b.dataset.mode); });
+    });
+  });
+
+  // **The same walk is not the same length, so the clock is translated rather than copied.**
+  // Three takes of one path are three separate runs of the app on a simulator, and a run is a
+  // few tenths of a second longer or shorter than the one before it — 91.6 s against 90.9 s
+  // between the first two, with the gap opening unevenly along the way. Handing a variant the
+  // default's raw time would therefore put it half a second into a different action at the far
+  // end of the film, which is a switch that jumps even though no frame was dropped.
+  //
+  // Each take's recorder writes out where its own beats begin, so the two timelines are known
+  // and the map between them is piecewise linear: find the beat the clock is inside, take how
+  // far through it is, and land the same fraction into the same beat of the other take. Beats
+  // are whole actions, so matching their edges matches what is on screen.
+  var variantTimes = {};
+  try {
+    var extra = document.getElementById('demo-variants');
+    if (extra) { variantTimes = JSON.parse(extra.textContent) || {}; }
+  } catch (e) { variantTimes = {}; }
+
+  var clockMarks = beatMarks(data);
+  function beatMarks(d) {
+    var b = (d.beats || []).filter(function (x) { return x.title || x.start != null; });
+    if (!b.length) { return null; }
+    var marks = b.map(function (x) { return x.start; });
+    marks.push(b[b.length - 1].end);
+    return marks;
+  }
+
+  function translate(mode, t) {
+    var them = variantTimes[mode] && variantTimes[mode].marks;
+    var us = clockMarks;
+    if (!them || !us || them.length !== us.length) { return t; }
+    for (var i = 0; i < us.length - 1; i++) {
+      if (t < us[i + 1] || i === us.length - 2) {
+        var span = Math.max(0.001, us[i + 1] - us[i]);
+        var frac = Math.min(1, Math.max(0, (t - us[i]) / span));
+        return them[i] + frac * (them[i + 1] - them[i]);
+      }
+    }
+    return t;
+  }
+
+  // **Held in step by running slightly fast or slightly slow, not by seeking.** The first
+  // version corrected any drift over a frame or two by writing `currentTime`, and it made the
+  // thing it was built to prevent: three videos playing free drift by a couple of tenths within
+  // seconds, so at four `timeupdate`s a second every variant was seeking more or less
+  // continuously — and a video that is seeking has dropped below `HAVE_CURRENT_DATA`, which is
+  // exactly the state in which it cannot be shown. Pressing a tab then did nothing until the
+  // seek landed. It was caught on a phone-sized window, where the switch showed the take before
+  // the one that had been asked for.
+  //
+  // So a tenth of a second either way is absorbed by the playback rate instead — 2% fast or 2%
+  // slow closes it inside a second or two, is inaudible on a silent film and invisible on one,
+  // and never interrupts decoding. A seek is kept for the case it is actually for: a jump, which
+  // is somebody pressing a tick, and which no rate can catch up with.
+  var SEEK = 0.4;
+  var LOOSE = 0.05;
+  film.addEventListener('timeupdate', function () {
+    var t = film.currentTime;
+    variants.forEach(function (v) {
+      if (v.dataset.loaded !== '1') { return; }
+      var drift = v.currentTime - translate(v.dataset.mode, t);
+      if (Math.abs(drift) > SEEK) {
+        v.currentTime = translate(v.dataset.mode, t);
+        v.playbackRate = 1;
+      } else if (Math.abs(drift) > LOOSE) {
+        v.playbackRate = 1 - Math.max(-0.02, Math.min(0.02, drift * 0.2));
+      } else if (v.playbackRate !== 1) {
+        v.playbackRate = 1;
+      }
+      if (v.paused) {
+        var playing = v.play();
+        if (playing && playing.catch) { playing.catch(function () {}); }
+      }
+    });
+    if (wanted !== current) { show(wanted); }
+  });
+
+  // Fetched unasked only where that is a fair thing to do: not on a metered connection, not on
+  // a slow one, and not before the page itself has finished arriving.
+  function prefetch() {
+    var c = navigator.connection;
+    if (c && (c.saveData || /^(slow-)?2g$/.test(c.effectiveType || ''))) { return; }
+    variants.forEach(function (v) { load(v.dataset.mode); });
+  }
+  function later() { setTimeout(prefetch, 4000); }
+  if (document.readyState === 'complete') { later(); } else { window.addEventListener('load', later); }
 }());
 </script>
 
