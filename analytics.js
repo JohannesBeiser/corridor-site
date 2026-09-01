@@ -1,4 +1,4 @@
-// Website analytics — PostHog, EU cloud.
+// Website analytics — PostHog, EU region, behind a proxy on this site's own domain.
 //
 // The site, not the app. Corridor itself sends nothing of the sort and this file is
 // never bundled into it; it exists so I can tell whether a page on corridor-trails.com
@@ -16,9 +16,22 @@
 !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init capture register register_once register_for_session unregister unregister_for_session getFeatureFlag getFeatureFlagResult isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey getNextSurveyStep identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty createPersonProfile opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing debug".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
 
 posthog.init('phc_CzCNi5dYMrJR52jnA9vC7pwEeRd3R6teHSvBWQ6S6qXF', {
-  // EU region. Chosen for a Swiss author and a mostly European reader; the US region
-  // is a different account entirely and a project cannot be moved between them.
-  api_host: 'https://eu.i.posthog.com',
+  // A subdomain of this site, not PostHog's own host, and the reason is measurable:
+  // EasyPrivacy blocks `||i.posthog.com/static/array.js` and `||i.posthog.com/i/`
+  // outright, which was 100% of the events on the first day and is 10-25% of any real
+  // audience. Pointed straight at eu.i.posthog.com this file loaded fine and the SDK
+  // bundle it asks for came back ERR_BLOCKED_BY_CLIENT. e.corridor-trails.com is
+  // PostHog's own managed proxy, free on every cloud plan, a CNAME at Namecheap, and
+  // Cloudflare in front of it. The name is deliberately not `analytics.` or `tracking.`,
+  // which are blocked by name.
+  //
+  // The loader above derives the bundle URL from this value by string replacement, so
+  // both the events and array.js come from this domain and no blocklist has a rule for it.
+  api_host: 'https://e.corridor-trails.com',
+
+  // Where the dashboards live. The proxy serves ingest, not the app, so links out of the
+  // toolbar need the real host or they go nowhere.
+  ui_host: 'https://eu.posthog.com',
 
   // A dated snapshot of PostHog's own defaults. Pinning it means a future release
   // cannot quietly change what this site captures; raising it is a deliberate edit.
