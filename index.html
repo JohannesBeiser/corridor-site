@@ -322,10 +322,28 @@
     /* The stack is what is sized now, and the videos fill it. 18.4rem rather than 15.5: the row
        of mode tabs is new furniture above the phone and is about 2.9rem of it, so a picture
        measured against the old number would push the first beat's heading back under the fold —
-       which is the exact bug the paragraph above this one records. */
+       which is the exact bug the paragraph above this one records.
+
+       **The width is computed from the height rather than left to `aspect-ratio`, and that is a
+       WebKit bug rather than a preference.** The bezel is `width:fit-content`, so it asks its
+       child how wide it wants to be; the child is `height:<definite>; width:auto` and expects
+       the aspect ratio to answer. A `<video>` used to be that child and did answer — a replaced
+       element contributes an intrinsic width from its own shape. `.screen` is a `<div>`, and on
+       iOS — every browser there, Chrome included, because they are all WebKit — a non-replaced
+       block contributes **nothing** from `aspect-ratio` to a shrink-to-fit parent. The bezel
+       collapsed to its own padding and the film shipped as a 20 px dark strip the full height of
+       the picture, on the live site, for every phone. Desktop Chrome and Safari both resolve it,
+       which is why no window narrowed in dev tools ever showed it.
+
+       So one height expression, named once, and the width is that height times the film's own
+       720/1566. The third term in the `min` is the horizontal ceiling — 3rem of `.wrap` padding
+       plus the bezel's own 18 px, turned back into a height — which is what `max-width` can no
+       longer do for us now that the width is definite. */
     .phone .screen {
-      height:min(70svh, calc(100svh - 18.4rem));
-      width:auto; max-width:100%;
+      --film-h:min(70svh, calc(100svh - 18.4rem), calc((100vw - 4.2rem) * 1566 / 720));
+      height:var(--film-h);
+      width:calc(var(--film-h) * 720 / 1566);
+      max-width:100%;
     }
   }
 </style>
