@@ -59,9 +59,10 @@
   }
   h1 {
     font-size:clamp(2.6rem,8vw,4rem); font-weight:600; letter-spacing:-.028em;
-    line-height:1; margin:0 0 .5rem;
+    line-height:1; margin:0 0 .38rem;
   }
   .tagline { font-size:clamp(1.05rem,3vw,1.3rem); color:var(--faint); margin:0 0 1.8rem; }
+
   .lede { max-width:34rem; margin:0 auto 2.3rem; font-size:1.08rem; text-wrap:pretty; }
 
   .cta { display:inline-flex; align-items:center; gap:.6rem; border:0; font-family:inherit;
@@ -90,6 +91,69 @@
   .facts b { color:var(--ink); font-weight:600; }
   .facts span::after { content:"·"; margin:0 .7rem; opacity:.5; }
   .facts span:last-child::after { content:""; margin:0; }
+
+  /* **The trails, as their own marks and nothing else.** Between the tagline and the lede,
+     with no heading and no names — a row of trail badges on a thru-hiking page needs no
+     sentence saying what it is, and a label would only repeat what each mark already says. The
+     names live in the `alt` text, which is where a screen reader and a crawler read them and
+     where they cost the layout nothing.
+
+     **It sat under the facts row until 2026-09-10 and it reads better here**, which is the
+     hiker's call: *offline maps for the whole trail* is a claim about coverage and the row of
+     marks is the evidence for it, so the two belong next to each other rather than 200 px
+     apart with the buttons in between. It is also the one thing in the hero that survives the
+     mobile cut — the lede and the facts row are both `display:none` under 40rem — so up here it
+     is what a phone reads between the tagline and the buttons.
+
+     No rule above or below it. It is inside the run of centred hero copy now, and a line
+     through that run would cut the tagline off from the sentence under it.
+
+     Sized by height rather than width, because these are seven organisations' badges at seven
+     aspect ratios — five upright shields, one square tile and one wordmark — and a common
+     width would draw the wordmark twice the size of the shields. `width`/`height` on each
+     `<img>` are its real ratio, so the row reserves its own space before the six files land.
+
+     **The plate is dark mode only.** Most of these marks are dark lettering on a transparent ground,
+     which is invisible on `--paper` at #101314; the app has the same problem inside an
+     ink-filled row and solves it the same way (`TrailLogo`, `EnvironmentValues.markPlate`).
+     These are somebody else's trade marks and a palette cannot reach inside one, so it goes
+     behind. */
+  .trails {
+    display:flex; flex-wrap:wrap; align-items:center; justify-content:center;
+    gap:1.1rem 1.7rem; margin:0 auto 2.1rem; max-width:46rem;
+  }
+  .trails img { display:block; height:48px; width:auto; }
+
+  /* **The label the row deliberately does not show.** The hiker's call was no visible heading —
+     trail badges on a thru-hiking page say what they are — but *nothing on screen* and
+     *nothing anywhere* are different things: a screen reader otherwise reads a run of trail names
+     out of nowhere with no sentence saying why they are there, and a crawler sees the `alt`
+     strings with no claim attached to them. This is that claim, in text, one line above them.
+
+     The `clip-path`/1px technique rather than `display:none` or `visibility:hidden`, both of
+     which take the text out for assistive technology too, and rather than a negative text-indent
+     or an off-screen `left:-9999px`, which are read but are also what actual cloaking looks
+     like. This is honest hidden text: it says exactly what the pictures beside it say. */
+  .vh {
+    position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden;
+    clip-path:inset(50%); white-space:nowrap; border:0;
+  }
+  @media (prefers-color-scheme: dark) {
+    .trails img { background:#F4F2ED; border-radius:5px; padding:3px; }
+  }
+  /* **Sized off the viewport rather than stepped at a breakpoint, because the marks in one line
+     is the whole idea and a fixed height breaks it at some width.** Seven badges at 40 px measured
+     414 px with their gaps and a 390 px phone gives the row 342, so it wrapped six and one —
+     which reads as a mistake rather than as two rows. `clamp` holds the line down to a 320 px
+     screen and gives the marks 46 px back by the time the facts row returns. Both factors came
+     down when the seventh mark landed: a row is 7.32 marks wide now, not 6.27. The row is six
+     marks since the AT came out, so it has room to spare at every width the clamp was cut for;
+     the numbers above are kept as they are because they are what these values were chosen against
+     and what a seventh mark would have to fit again. */
+  @media (max-width:40rem) {
+    .trails { margin-bottom:1.9rem; gap:.8rem clamp(.45rem, 2vw, 1.1rem); }
+    .trails img { height:clamp(28px, 9.5vw, 48px); }
+  }
 
   /* ---- the film ---- */
   section.film { padding:4rem 0 5rem; border-bottom:1px solid var(--hair); }
@@ -393,7 +457,7 @@
       "publisher": {
         "@id": "https://corridor-trails.com/#org"
       },
-      "keywords": "thru-hiking navigation app, offline hiking maps, thru-hike GPS, offline topographic maps, Te Araroa app, Pacific Crest Trail app, Great Divide Trail app, free hiking navigation, long-distance hiking app",
+      "keywords": "thru-hiking navigation app, offline hiking maps, thru-hike GPS, offline topographic maps, Te Araroa app, Pacific Crest Trail app, Continental Divide Trail app, Appalachian Trail app, Great Divide Trail app, Arizona Trail app, Haute Randonnée Pyrénéenne app, free hiking navigation, long-distance hiking app",
       "audience": {
         "@type": "Audience",
         "audienceType": "Thru-hikers and long-distance backpackers"
@@ -425,7 +489,23 @@
         },
         {
           "@type": "Thing",
+          "name": "Continental Divide Trail"
+        },
+        {
+          "@type": "Thing",
+          "name": "Appalachian Trail"
+        },
+        {
+          "@type": "Thing",
           "name": "Great Divide Trail"
+        },
+        {
+          "@type": "Thing",
+          "name": "Arizona Trail"
+        },
+        {
+          "@type": "Thing",
+          "name": "Haute Randonnée Pyrénéenne"
         }
       ],
       "softwareVersion": "beta",
@@ -592,9 +672,26 @@
   <div class="wrap">
     <img class="icon" src="img/icon.webp" width="92" height="92" alt="The Corridor app icon: a trail line through a corridor of ground, with a red dot on it.">
     <h1>Corridor</h1>
+    <!-- **The Swiss made mark is off the page until the claim is allowed.** The flag and
+         the words sat here, under the h1 and above the tagline; "Swiss made" is a
+         protected origin indication and using it needs the permission this app does not
+         have yet. Taken down 2026-09-14 rather than reworded — the CSS and the drawn
+         federal flag go back verbatim from git the day the permission does. -->
     <p class="tagline">Thru-hiking navigation — offline maps for the whole trail</p>
-    <p class="lede">Made by thru-hikers for thru-hikers. This app is hand-tailored to what we
-    need on trail.</p>
+    <p class="trails">
+      <span class="vh">Trails with complete offline maps in Corridor:</span>
+      <img src="img/trails/pct.webp" width="48" height="48" alt="Pacific Crest Trail">
+      <img src="img/trails/cdt.webp" width="47" height="48" alt="Continental Divide Trail">
+      <!-- The Appalachian Trail mark came out of the row on 2026-09-17. The file is still
+           img/trails/at.webp and the trail is still in the structured data below; only the
+           badge is down, so putting it back is this one line. -->
+      <img src="img/trails/gdt.webp" width="49" height="48" alt="Great Divide Trail">
+      <img src="img/trails/azt.webp" width="54" height="48" alt="Arizona Trail">
+      <img src="img/trails/te-araroa.webp" width="52" height="48" alt="Te Araroa">
+      <img src="img/trails/hrp.webp" width="53" height="48" alt="Haute Randonnée Pyrénéenne">
+    </p>
+    <p class="lede">Made by thru-hikers for thru-hikers. This app is hand-tailored to what
+    you need on trail.</p>
 
     <a class="cta cta-beta" href="https://testflight.apple.com/join/bbzZA5uk" target="_blank" rel="noopener">
       Participate in beta testing NOW
@@ -703,6 +800,8 @@
       reports, not just a mapper's guess.</li>
       <li><b>What's worth knowing before the next section</b> — permits, river crossings,
       seasonal closures, long water carries.</li>
+      <li><b>Trail closures</b> — see which parts of the trail are currently closed due to fire
+      or other reasons, and how to get around.</li>
       <li><b>How far you've walked today</b> and what's left to where you're stopping.</li>
       <li><b>What taking an alternate means for you</b>, before committing to it.</li>
     </ul>
@@ -778,7 +877,7 @@
 <!-- Written by Tools/publish-demo.py straight out of the take that produced the video, so the
      words beside the phone cannot drift from what the phone is doing. Do not edit by hand. -->
 <script id="demo-timeline" type="application/json">
-{"path": "gdt-tour", "durationSeconds": 91.612, "beats": [{"id": "one-screen", "start": 0.001, "end": 9.321, "title": "Everything on one screen.", "body": "The map and the elevation profile stay in sync. The map is a corridor along the trail — up is ahead, down is behind."}, {"id": "your-day", "start": 9.321, "end": 15.727, "title": "Your day", "body": "See your progress towards your destination in the top area."}, {"id": "three-d", "start": 15.728, "end": 42.301, "title": "Look at any place in 3D", "body": "Search for anywhere on the trail, then draw a circle around it and turn the ground — so you know what it actually looks like before you walk it."}, {"id": "offline-map", "start": 42.303, "end": 48.28, "title": "A huge offline map", "body": "A 90 km corridor around the trail, with the road map inside it — so you can always see where you are and how you would get out. Everything on screen is already on the phone: none of it needs a signal."}, {"id": "trail-info", "start": 48.28, "end": 56.758, "title": "Trail information", "body": "Read what this trail asks of you before you start — and see every alternate there is."}, {"id": "alternate", "start": 56.758, "end": 69.587, "title": "Choose an alternate", "body": "Re-route through any alternate and the whole trail adjusts itself around it."}, {"id": "planner", "start": 69.587, "end": 80.074, "title": "Section planner", "body": "Plan your next section or the whole trail, and see what is in it before you walk in — long water carries, bear-can rules, reservations, dangerous crossings, re-routes and closures."}, {"id": "all-trails", "start": 80.074, "end": 91.612, "title": "All major trails — free, for ever", "body": "Hi, I'm Pez! I'm a Thru-Hiker from Switzerland and on all my trails I've dreamt about making this app. An app that is completely hand-tailored to the needs we have on trail.", "image": "img/pez.webp", "imageAlt": "Pez standing on a rock at the edge of a turquoise glacial lake, looking up at a snow-streaked rock wall."}]}
+{"path": "gdt-tour", "durationSeconds": 91.038, "beats": [{"id": "one-screen", "start": 0.001, "end": 9.351, "title": "Everything on one screen.", "body": "The map and the elevation profile stay in sync. The map is a corridor along the trail — up is ahead, down is behind."}, {"id": "your-day", "start": 9.351, "end": 15.577, "title": "Your day", "body": "See your progress towards your destination in the top area."}, {"id": "three-d", "start": 15.577, "end": 41.38, "title": "Look at any place in 3D", "body": "Search for anywhere on the trail, then draw a circle around it and turn the ground — so you know what it actually looks like before you walk it."}, {"id": "offline-map", "start": 41.381, "end": 47.324, "title": "A huge offline map", "body": "A 90 km corridor around the trail, with the road map inside it — so you can always see where you are and how you would get out. Everything on screen is already on the phone: none of it needs a signal."}, {"id": "trail-info", "start": 47.324, "end": 56.008, "title": "Trail information", "body": "Read what this trail asks of you before you start — and see every alternate there is."}, {"id": "alternate", "start": 56.008, "end": 68.884, "title": "Choose an alternate", "body": "Re-route through any alternate and the whole trail adjusts itself around it."}, {"id": "planner", "start": 68.884, "end": 79.233, "title": "Section planner", "body": "Plan your next section or the whole trail, and see what is in it before you walk in — long water carries, bear-can rules, reservations, dangerous crossings, re-routes and closures."}, {"id": "all-trails", "start": 79.233, "end": 91.037, "title": "All major trails — free, for ever", "body": "Hi, I'm Pez! I'm a Thru-Hiker from Switzerland and on all my trails I've dreamt about making this app. An app that is completely hand-tailored to the needs we have on trail.", "image": "img/pez.webp", "imageAlt": "Pez standing on a rock at the edge of a turquoise glacial lake, looking up at a snow-streaked rock wall."}]}
 </script>
 
 <script>
@@ -946,7 +1045,7 @@
      does not accrue evenly, which is the whole reason this is here. Regenerate it with the films
      — see README. -->
 <script id="demo-variants" type="application/json">
-{"dark": {"duration": 90.937, "marks": [0.001, 9.365, 15.625, 41.586, 47.499, 56.059, 69.113, 79.386, 90.936]}, "mosquito": {"duration": 91.586, "marks": [0.001, 9.194, 15.481, 42.415, 48.416, 57.064, 69.859, 80.057, 91.586]}}
+{"dark": {"duration": 91.375, "marks": [0.001, 9.174, 15.433, 41.375, 47.503, 56.102, 69.118, 79.424, 91.374]}, "mosquito": {"duration": 91.139, "marks": [0.001, 9.418, 15.786, 41.646, 47.706, 56.38, 69.471, 79.771, 91.138]}}
 </script>
 
 <script>
