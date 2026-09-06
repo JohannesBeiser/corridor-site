@@ -53,3 +53,21 @@ posthog.init('phc_CzCNi5dYMrJR52jnA9vC7pwEeRd3R6teHSvBWQ6S6qXF', {
   // the numbers and it is the same answer this project gives everywhere else.
   respect_dnt: true,
 });
+
+// Not counting the author, which on the first day was nine of the nine people the site
+// had ever seen: two browsers, several private windows, a blocker toggled on and off, and
+// two networks that geolocated to two different cities. One human, nine cookies.
+//
+// Visit corridor-trails.com/?ph=off once in each browser and on the phone and this browser
+// stops sending, for good - PostHog writes the opt-out into local storage, so it survives
+// a restart and every later visit. ?ph=on undoes it. Clearing site data also undoes it,
+// which is worth knowing before concluding the numbers are wrong again.
+//
+// The alternative was an internal-user filter in the project settings, and it was not taken:
+// it would have to key on something, and the only candidates were a Swiss IP and a Swiss
+// city - which is also what a real hiker in Zurich looks like.
+try {
+  var phFlag = new URLSearchParams(location.search).get('ph');
+  if (phFlag === 'off') posthog.opt_out_capturing();
+  if (phFlag === 'on') posthog.opt_in_capturing();
+} catch (e) { /* an old browser without URLSearchParams simply stays counted */ }
