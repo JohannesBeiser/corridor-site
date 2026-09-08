@@ -293,16 +293,6 @@
   .answers li:first-child { border-top:1px solid var(--hair); }
   .answers b { font-weight:600; }
   .answers .aside { display:block; margin-top:.35rem; font-size:.72rem; color:var(--faint); }
-  /* **A chip for a row that names something the app cannot do yet.** Every other line in this
-     list is a thing you can open today, and a reader has no way to tell one of them apart from a
-     plan unless the row says so. Outlined rather than filled, in `--faint` and small caps, so it
-     reads as a status on the row and not as a badge selling it. */
-  .answers .soon {
-    display:inline-block; margin-left:.5rem; padding:.08rem .5rem .12rem;
-    font-size:.68rem; font-weight:600; letter-spacing:.04em; text-transform:uppercase;
-    color:var(--faint); border:1px solid var(--hair); border-radius:100px;
-    vertical-align:.1em; white-space:nowrap;
-  }
 
   section.closing { padding:5rem 0 3.5rem; text-align:center; }
   section.closing h2 { margin-bottom:1.4rem; font-size:clamp(1.6rem,4.5vw,2.1rem);
@@ -744,8 +734,8 @@
       reports, not just a mapper's guess.</li>
       <li><b>What's worth knowing before the next section</b> — permits, river crossings,
       seasonal closures, long water carries.</li>
-      <li><b>Trail closures</b> <span class="soon">Coming soon</span> — see which parts of the
-      trail are currently closed due to fire or other reasons, and how to get around.</li>
+      <li><b>Trail closures</b> — see which parts of the trail are currently closed due to fire
+      or other reasons, and how to get around.</li>
       <li><b>How far you've walked today</b> and what's left to where you're stopping.</li>
       <li><b>What taking an alternate means for you</b>, before committing to it.</li>
     </ul>
