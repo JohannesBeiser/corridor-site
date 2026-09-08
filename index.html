@@ -59,9 +59,33 @@
   }
   h1 {
     font-size:clamp(2.6rem,8vw,4rem); font-weight:600; letter-spacing:-.028em;
-    line-height:1; margin:0 0 .5rem;
+    line-height:1; margin:0 0 .38rem;
   }
   .tagline { font-size:clamp(1.05rem,3vw,1.3rem); color:var(--faint); margin:0 0 1.8rem; }
+
+  /* **Swiss made, on the title rather than after the tagline.** The watch-industry line rather
+     than *Made in Switzerland* — shorter, and the form anybody reading it already knows.
+
+     **It went under the tagline first and that was wrong.** The reasoning was that the title and
+     the tagline are one unit and a credential does not belong inside it, which is true of a
+     sentence and false of a stamp: a stamp belongs on the name. Under the tagline it read as a
+     third line of copy — the last thing in a descending sequence, at the moment the eye is
+     already leaving for the lede. Under the h1 it is part of the name, and the tagline that
+     follows is unbroken.
+
+     So it is set tight: 0.38rem under a title with `line-height:1`, 0.42rem above the tagline,
+     0.8rem of type against the tagline's 1.05–1.3, and 0.34rem between flag and word. Dense on
+     purpose — a credential that is spaced like body copy is a claim, and this is a mark.
+
+     **The flag is drawn, not an emoji.** 🇨🇭 is a regional-indicator pair, and every Windows
+     browser renders it as the bare letters CH — a broken picture on the one platform that cannot
+     show it, in the one place on the page that is meant to look considered. This is the federal
+     geometry: a square, arms 6 wide and 7 long on a side of 32, so it is the flag rather than a
+     cross that looks like it. Kept on mobile, unlike the lede and the facts — it is six
+     characters and it is the point. */
+  .swiss { display:flex; align-items:center; justify-content:center; gap:.34rem;
+           margin:0 0 .42rem; font-size:.8rem; line-height:1.2; color:var(--faint); }
+  .swiss svg { width:1.1em; height:1.1em; border-radius:2px; flex:none; }
   .lede { max-width:34rem; margin:0 auto 2.3rem; font-size:1.08rem; text-wrap:pretty; }
 
   .cta { display:inline-flex; align-items:center; gap:.6rem; border:0; font-family:inherit;
@@ -592,6 +616,13 @@
   <div class="wrap">
     <img class="icon" src="img/icon.webp" width="92" height="92" alt="The Corridor app icon: a trail line through a corridor of ground, with a red dot on it.">
     <h1>Corridor</h1>
+    <p class="swiss">
+      <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+        <rect width="32" height="32" fill="#D52B1E"/>
+        <path d="M13 6h6v7h7v6h-7v7h-6v-7H6v-6h7z" fill="#fff"/>
+      </svg>
+      Swiss made
+    </p>
     <p class="tagline">Thru-hiking navigation — offline maps for the whole trail</p>
     <p class="lede">Made by thru-hikers for thru-hikers. This app is hand-tailored to what we
     need on trail.</p>
