@@ -142,14 +142,11 @@
     .trails img { background:#F4F2ED; border-radius:5px; padding:3px; }
   }
   /* **Sized off the viewport rather than stepped at a breakpoint, because the marks in one line
-     is the whole idea and a fixed height breaks it at some width.** Seven badges at 40 px measured
+     is the whole idea and a fixed height breaks it at some width.** Seven badges at 40 px measure
      414 px with their gaps and a 390 px phone gives the row 342, so it wrapped six and one —
      which reads as a mistake rather than as two rows. `clamp` holds the line down to a 320 px
      screen and gives the marks 46 px back by the time the facts row returns. Both factors came
-     down when the seventh mark landed: a row is 7.32 marks wide now, not 6.27. The row is six
-     marks since the AT came out, so it has room to spare at every width the clamp was cut for;
-     the numbers above are kept as they are because they are what these values were chosen against
-     and what a seventh mark would have to fit again. */
+     down when the seventh mark landed: a row is 7.32 marks wide now, not 6.27. */
   @media (max-width:40rem) {
     .trails { margin-bottom:1.9rem; gap:.8rem clamp(.45rem, 2vw, 1.1rem); }
     .trails img { height:clamp(28px, 9.5vw, 48px); }
@@ -380,9 +377,24 @@
     section.film { padding:1rem 0 3.5rem; }
     .film .wrap { gap:1.75rem; }
     .controls { margin-top:1.1rem; }
-    /* Shrink-wrapped, so the bezel is the picture's width and not the column's — its padding and
-       its corner radius are percentages and stay in proportion at any height. */
-    .phone { width:fit-content; max-width:100%; }
+    /* Shrink-wrapped, so the bezel is the picture's width and not the column's.
+
+       **Its corners and its padding are lengths computed from the screen's width, not
+       percentages**, and that was a bug on every phone until 2026-09-30. A percentage
+       `border-radius` is a percentage of the width *horizontally* and of the height
+       *vertically*, so on a box twice as tall as it is wide every corner was an ellipse twice as
+       tall as it was wide — an egg rather than an iPhone. The desktop never showed it because the
+       46 px and 38 px caps win there; on a phone the percentage is under the cap and it wins. A
+       percentage padding was wrong a second way: it is taken of the column, not of the bezel.
+       The three factors are the desktop's own proportions, read off a 326 px screen in a 344 px
+       bezel: 9 px of padding, a 46 px outer and a 38 px inner radius. */
+    .phone {
+      --film-h:min(70svh, calc(100svh - 18.4rem), calc((100vw - 4.2rem) * 1566 / 720));
+      --screen-w:calc(var(--film-h) * 720 / 1566);
+      width:fit-content; max-width:100%;
+      padding:min(calc(var(--screen-w) * .0276), 9px);
+      border-radius:min(calc(var(--screen-w) * .141), 46px);
+    }
     /* The stack is what is sized now, and the videos fill it. 18.4rem rather than 15.5: the row
        of mode tabs is new furniture above the phone and is about 2.9rem of it, so a picture
        measured against the old number would push the first beat's heading back under the fold —
@@ -399,15 +411,15 @@
        the picture, on the live site, for every phone. Desktop Chrome and Safari both resolve it,
        which is why no window narrowed in dev tools ever showed it.
 
-       So one height expression, named once, and the width is that height times the film's own
+       So one height expression, named once on `.phone` so the bezel's corners can read it too, and the width is that height times the film's own
        720/1566. The third term in the `min` is the horizontal ceiling — 3rem of `.wrap` padding
        plus the bezel's own 18 px, turned back into a height — which is what `max-width` can no
        longer do for us now that the width is definite. */
     .phone .screen {
-      --film-h:min(70svh, calc(100svh - 18.4rem), calc((100vw - 4.2rem) * 1566 / 720));
       height:var(--film-h);
-      width:calc(var(--film-h) * 720 / 1566);
+      width:var(--screen-w);
       max-width:100%;
+      border-radius:min(calc(var(--screen-w) * .1166), 38px);
     }
   }
 </style>
@@ -682,9 +694,7 @@
       <span class="vh">Trails with complete offline maps in Corridor:</span>
       <img src="img/trails/pct.webp" width="48" height="48" alt="Pacific Crest Trail">
       <img src="img/trails/cdt.webp" width="47" height="48" alt="Continental Divide Trail">
-      <!-- The Appalachian Trail mark came out of the row on 2026-09-17. The file is still
-           img/trails/at.webp and the trail is still in the structured data below; only the
-           badge is down, so putting it back is this one line. -->
+      <img src="img/trails/at.webp" width="49" height="48" alt="Appalachian Trail">
       <img src="img/trails/gdt.webp" width="49" height="48" alt="Great Divide Trail">
       <img src="img/trails/azt.webp" width="54" height="48" alt="Arizona Trail">
       <img src="img/trails/te-araroa.webp" width="52" height="48" alt="Te Araroa">
