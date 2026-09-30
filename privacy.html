@@ -36,7 +36,7 @@
 <p class="back"><a href="./">← Corridor</a></p>
 
 <h1>Privacy Policy</h1>
-<p class="sub">Corridor · last updated 1 September 2026</p>
+<p class="sub">Corridor · last updated 30 September 2026</p>
 
 <p><strong>The app has no account, no sign-in, no analytics, and no server running code I
 wrote.</strong> Almost everything the app knows about you stays on your phone: where you are,
@@ -46,9 +46,9 @@ where you have walked, where you slept, what you have planned. None of it is eve
 as of today and there is a section on it below. Nothing joins the two: the site learns nothing
 about your phone, and the app sends nothing here.</p>
 
-<p><strong>One thing you can choose to share: a comment about a place.</strong> If you write
-one, it goes to Apple&rsquo;s iCloud so other hikers can read it. That is the only thing this
-app ever sends, and only when you type it and press Post.</p>
+<p><strong>Two things you can choose to share: a comment about a place, and a report on a water
+source.</strong> If you write one, it goes to Apple&rsquo;s iCloud so other hikers can read it. Those
+are the only things this app ever sends, and only when you write one and send it.</p>
 
 <h2>Comments</h2>
 <p>Every waypoint has a place to write a note for the next hiker &mdash; the tank is dry, the
@@ -61,14 +61,24 @@ chose one. Your comment is signed <em>anonymous</em> if you did not.</p>
 identifies you to the app by an opaque code that is different for every app you use and cannot be
 turned back into a person &mdash; not by me and not by anyone else. I never receive your name,
 your email address, your phone number or your Apple Account.</p>
-<p>You can delete any comment you have written, at any time, from the place it is about. You can
-delete <em>all</em> of them at once in Settings. You can hide any other hiker&rsquo;s comments by
+<p>You can delete any comment you have written, at any time, from the place it is about. You can hide any other hiker&rsquo;s comments by
 blocking them, and report anything that should not be there &mdash; three reports remove a comment
 from every phone.</p>
-<p>Everything you write is checked on your own phone before it is sent, by Apple&rsquo;s on-device
-model. That check happens on the phone and the text is not sent anywhere to perform it.</p>
-<p>If you never write a comment, nothing about you is stored in iCloud by this app at all.
-Reading what other people wrote sends nothing.</p>
+<p>Everything you write is checked on your own phone before it is sent, against a list of words
+that are not allowed. That check happens on the phone and the text is not sent anywhere to perform
+it.</p>
+<p>A comment stays until you delete it or it is removed for breaking the rules.</p>
+
+<h2>Water reports</h2>
+<p>A water source can carry a report: whether it had water, almost none, or was dry, and when you saw it. If
+you send one, these things are stored in Apple&rsquo;s iCloud and are <strong>public</strong>: the
+reading, the day you saw it, which water source it is about, and the trail name you chose if you
+chose one. The location stored with it is the water source&rsquo;s, not your phone&rsquo;s.</p>
+<p>You can delete any report you have sent, from the water source it is about. A report stays until
+you delete it or it is removed for breaking the rules.</p>
+
+<p>If you never write a comment or send a report, nothing about you is stored in iCloud by this app
+at all. Reading what other people wrote sends nothing.</p>
 
 <h2>Your location</h2>
 <p>The app asks for your location so it can show where you are on the trail, measure how far
@@ -98,8 +108,9 @@ works; it simply cannot draw where you are.</p>
       and is handed it back. Nothing in the app records who downloaded which trail; the request
       itself is the same one anyone would send for a public file, and I have built nothing that
       logs, counts or connects it to a person.</li>
-  <li><strong>Comments</strong>, through Apple&rsquo;s CloudKit. Reading them sends nothing about
-      you. Writing one sends what is listed under <em>Comments</em> above.</li>
+  <li><strong>Comments and water reports</strong>, through Apple&rsquo;s CloudKit. Reading them
+      sends nothing about you. Writing one sends what is listed under <em>Comments</em> and
+      <em>Water reports</em> above.</li>
 </ul>
 <p>Apple&rsquo;s own handling of iCloud data is covered by
 <a href="https://www.apple.com/legal/privacy/">Apple&rsquo;s privacy policy</a>, and Cloudflare&rsquo;s
@@ -128,12 +139,13 @@ who already hand out the map packs the app downloads.</p>
 it too, and the site works exactly the same either way.</p>
 
 <h2>Third parties</h2>
-<p><strong>In the app there are none.</strong> No advertising, no tracking, no crash reporting, no
-third-party SDKs of any kind. On this website there is one, and it is PostHog, described above.</p>
+<p><strong>In the app there are none.</strong> No advertising, no tracking, no crash reporting, and no
+third-party code that collects or sends anything: the two libraries it is built with draw the map
+and unpack the downloaded one. On this website there is one, and it is PostHog, described above.</p>
 
 <h2>Children</h2>
-<p>Corridor is rated 13+ because it lets hikers write notes other hikers can read. Nothing about
-you is collected unless you write one.</p>
+<p>Corridor is rated 4+. It lets hikers write notes other hikers can read, and nothing about
+you is collected unless you write a comment or send a water report.</p>
 
 <h2>Changes</h2>
 <p>If this policy ever changes, the date at the top of this page changes with it.</p>
