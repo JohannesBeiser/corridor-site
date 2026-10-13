@@ -63,6 +63,22 @@
   }
   .tagline { font-size:clamp(1.05rem,3vw,1.3rem); color:var(--faint); margin:0 0 1.8rem; }
 
+  /* **Made in Switzerland, on the title.** Back on 2026-10-14 at the hiker's call, in the plain
+     form rather than the *Swiss made* it carried until 2026-09-14. Neither is anybody's mark:
+     both are indications of source under the Swissness rules of the Trademark Protection Act,
+     free to use when true, and an app written in Switzerland by one person is a product whose
+     cost is almost wholly Swiss labour. The flag is the plain cross on red, not the coat of
+     arms in its shield, which is the Confederation's alone.
+
+     A stamp belongs on the name, so it sits under the h1 rather than after the tagline, set
+     tight: 0.38rem under a title with `line-height:1`, 0.42rem above the tagline, 0.8rem type.
+
+     **The flag is drawn, not an emoji.** 🇨🇭 is a regional-indicator pair, and every Windows
+     browser renders it as the bare letters CH. This is the federal geometry: a square, arms 6
+     wide and 7 long on a side of 32. */
+  .swiss { display:flex; align-items:center; justify-content:center; gap:.34rem;
+           margin:0 0 .42rem; font-size:.8rem; line-height:1.2; color:var(--faint); }
+  .swiss svg { width:1.3em; height:1.3em; border-radius:2px; flex:none; position:relative; top:-.08em; }
   .lede { max-width:34rem; margin:0 auto 2.3rem; font-size:1.08rem; text-wrap:pretty; }
 
   .cta { display:inline-flex; align-items:center; gap:.6rem; border:0; font-family:inherit;
@@ -75,6 +91,8 @@
      primary buttons side by side reads as a choice; stacked, it reads as the thing to do now
      and the thing that comes later. */
   .cta.cta-beta { display:flex; width:fit-content; margin:0 auto 1.2rem; }
+  /* The Android button sits under the App Store one with the same launch line beneath it. */
+  .cta.cta-play { margin-top:1.3rem; }
   .cta-note { display:block; margin-top:.85rem; font-size:.86rem; color:var(--faint); }
   .cta:disabled {
     opacity:.45; cursor:not-allowed; box-shadow:none; pointer-events:none;
@@ -224,6 +242,17 @@
      a muted autoplay video it has refused to start — in Low Power Mode it refuses all of them,
      and the poster under it is what should show until the first touch starts the film. */
   .phone .screen { -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
+  /* **And a still over the top whenever the film is not actually running**, because hiding a
+     player's parts with selectors is a request, not a guarantee — Firefox reads none of them and
+     iOS has moved its own controls out of their reach before. The poster as a plain image covers
+     whatever any browser draws on a stopped video, and it is lifted only on `playing`, which no
+     browser fires for a film it refused to start. Without JavaScript the film never starts, so
+     the still is what that reader always saw. */
+  .phone .cover {
+    position:absolute; inset:0; display:block; width:100%; height:100%; object-fit:cover;
+    pointer-events:none; opacity:1; transition:opacity .18s linear;
+  }
+  .phone .screen.running .cover { opacity:0; }
   .phone video { pointer-events:none; }
   .phone video::-webkit-media-controls,
   .phone video::-webkit-media-controls-enclosure,
@@ -623,8 +652,8 @@
       "thumbnailUrl": "https://corridor-trails.com/demo/poster.webp",
       "contentUrl": "https://corridor-trails.com/demo/gdt-tour.mp4",
       "embedUrl": "https://corridor-trails.com/#see-it",
-      "uploadDate": "2026-08-31",
-      "duration": "PT1M32S",
+      "uploadDate": "2026-10-14",
+      "duration": "PT1M42S",
       "inLanguage": "en",
       "isFamilyFriendly": true,
       "about": {
@@ -700,11 +729,13 @@
   <div class="wrap">
     <img class="icon" src="img/icon.webp" width="92" height="92" alt="The Corridor app icon: a trail line through a corridor of ground, with a red dot on it.">
     <h1>Corridor</h1>
-    <!-- **The Swiss made mark is off the page until the claim is allowed.** The flag and
-         the words sat here, under the h1 and above the tagline; "Swiss made" is a
-         protected origin indication and using it needs the permission this app does not
-         have yet. Taken down 2026-09-14 rather than reworded — the CSS and the drawn
-         federal flag go back verbatim from git the day the permission does. -->
+    <p class="swiss">
+      <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+        <rect width="32" height="32" fill="#D52B1E"/>
+        <path d="M13 6h6v7h7v6h-7v7h-6v-7H6v-6h7z" fill="#fff"/>
+      </svg>
+      Made in Switzerland
+    </p>
     <p class="tagline">Thru-hiking navigation — offline maps for the whole trail</p>
     <p class="trails">
       <span class="vh">Trails with complete offline maps in Corridor:</span>
@@ -727,8 +758,12 @@
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.05 12.54c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.72-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.87-.76-1.48.02-2.84.86-3.6 2.18-1.53 2.66-.39 6.6 1.1 8.76.73 1.06 1.6 2.25 2.74 2.2 1.1-.04 1.51-.71 2.84-.71 1.32 0 1.7.71 2.86.69 1.18-.02 1.93-1.08 2.65-2.14.84-1.23 1.18-2.42 1.2-2.48-.03-.01-2.29-.88-2.31-3.5zM14.9 5.9c.6-.74 1.01-1.76.9-2.78-.87.04-1.93.58-2.56 1.31-.56.65-1.06 1.69-.93 2.69.97.07 1.97-.49 2.59-1.22z"/></svg>
       Download on the App Store
     </button>
-    <p class="launch-note">Launching October 25, 2026 · <span class="countdown"></span></p>
-    <span class="cta-note">Free · iPhone · iOS 18+ · no account, no subscription</span>
+    <p class="launch-note">Launching October 25, 2026 · <span class="countdown" data-launch="2026-10-25"></span></p>
+    <button type="button" class="cta cta-play" disabled aria-disabled="true">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.2 2.4c-.2.2-.3.6-.3 1v17.2c0 .4.1.8.3 1l9.7-9.6-9.7-9.6zm10.8 8.5 2.9-2.9-10.9-6.3c-.4-.2-.7-.3-1-.2l9 9.4zm0 2.2-9 9.4c.3.1.6 0 1-.2l10.9-6.3-2.9-2.9zm3.9-4.1-3.1 3 3.1 3 3.3-1.9c.9-.5.9-1.7 0-2.2l-3.3-1.9z"/></svg>
+      Get it on Google Play
+    </button>
+    <p class="launch-note">Launching March 2027 · <span class="countdown" data-launch="2027-03-01"></span></p>
 
     <p class="facts">
       <span><b>Offline and free</b></span>
@@ -788,16 +823,20 @@
                  data-mode="default"
                  poster="demo/poster.webp"
                  aria-label="A walk through Corridor on the Great Divide Trail: scrolling the map, opening a campsite, drawing a piece of ground in 3D, taking an alternate and planning a section.">
+            <!-- HEVC first: half the size at the same sharpness, and every Apple device plays it.
+                 The browser takes the first source it can play, so the rest get the H.264. -->
+            <source src="demo/gdt-tour.hevc.mp4" type='video/mp4; codecs="hvc1"'>
             <source src="demo/gdt-tour.mp4" type="video/mp4">
           </video>
           <video class="variant" playsinline disablepictureinpicture disableremoteplayback
                  controlslist="nodownload nofullscreen noremoteplayback noplaybackrate"
                  muted loop preload="none" data-mode="dark"
-                 data-src="demo/gdt-tour-dark.mp4" aria-hidden="true" tabindex="-1"></video>
+                 data-src="demo/gdt-tour-dark.mp4" data-src-hevc="demo/gdt-tour-dark.hevc.mp4" aria-hidden="true" tabindex="-1"></video>
           <video class="variant" playsinline disablepictureinpicture disableremoteplayback
                  controlslist="nodownload nofullscreen noremoteplayback noplaybackrate"
                  muted loop preload="none" data-mode="mosquito"
-                 data-src="demo/gdt-tour-mosquito.mp4" aria-hidden="true" tabindex="-1"></video>
+                 data-src="demo/gdt-tour-mosquito.mp4" data-src-hevc="demo/gdt-tour-mosquito.hevc.mp4" aria-hidden="true" tabindex="-1"></video>
+          <img class="cover" src="demo/poster.webp" alt="" aria-hidden="true" draggable="false">
         </div>
       </div>
     </div>
@@ -843,8 +882,6 @@
 <section class="plain">
   <div class="wrap">
     <h2>Batteries included</h2>
-    <p class="section-lede">Everything a thru-hiking navigation app has to do on a long trail,
-    and the things we kept wishing ours would.</p>
     <ul class="answers">
       <li><b>Are your hands too cold or wet to pull out your phone?</b> — 'Hey Siri, Trail
       report' — and she will tell you how far you walked, how far it is to your
@@ -890,8 +927,12 @@
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.05 12.54c-.02-2.2 1.8-3.26 1.88-3.31-1.02-1.5-2.62-1.7-3.19-1.72-1.36-.14-2.65.8-3.34.8-.69 0-1.75-.78-2.87-.76-1.48.02-2.84.86-3.6 2.18-1.53 2.66-.39 6.6 1.1 8.76.73 1.06 1.6 2.25 2.74 2.2 1.1-.04 1.51-.71 2.84-.71 1.32 0 1.7.71 2.86.69 1.18-.02 1.93-1.08 2.65-2.14.84-1.23 1.18-2.42 1.2-2.48-.03-.01-2.29-.88-2.31-3.5zM14.9 5.9c.6-.74 1.01-1.76.9-2.78-.87.04-1.93.58-2.56 1.31-.56.65-1.06 1.69-.93 2.69.97.07 1.97-.49 2.59-1.22z"/></svg>
       Download on the App Store
     </button>
-    <p class="launch-note">Launching October 25, 2026 · <span class="countdown"></span></p>
-    <span class="cta-note">Free · iPhone · iOS 18+</span>
+    <p class="launch-note">Launching October 25, 2026 · <span class="countdown" data-launch="2026-10-25"></span></p>
+    <button type="button" class="cta cta-play" disabled aria-disabled="true">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.2 2.4c-.2.2-.3.6-.3 1v17.2c0 .4.1.8.3 1l9.7-9.6-9.7-9.6zm10.8 8.5 2.9-2.9-10.9-6.3c-.4-.2-.7-.3-1-.2l9 9.4zm0 2.2-9 9.4c.3.1.6 0 1-.2l10.9-6.3-2.9-2.9zm3.9-4.1-3.1 3 3.1 3 3.3-1.9c.9-.5.9-1.7 0-2.2l-3.3-1.9z"/></svg>
+      Get it on Google Play
+    </button>
+    <p class="launch-note">Launching March 2027 · <span class="countdown" data-launch="2027-03-01"></span></p>
   </div>
 </section>
 
@@ -909,7 +950,7 @@
 <!-- Written by Tools/publish-demo.py straight out of the take that produced the video, so the
      words beside the phone cannot drift from what the phone is doing. Do not edit by hand. -->
 <script id="demo-timeline" type="application/json">
-{"path": "gdt-tour", "durationSeconds": 91.038, "beats": [{"id": "one-screen", "start": 0.001, "end": 9.351, "title": "Everything on one screen.", "body": "The map and the elevation profile stay in sync. The map is a corridor along the trail — up is ahead, down is behind."}, {"id": "your-day", "start": 9.351, "end": 15.577, "title": "Your day", "body": "See your progress towards your destination in the top area."}, {"id": "three-d", "start": 15.577, "end": 41.38, "title": "Look at any place in 3D", "body": "Search for anywhere on the trail, then draw a circle around it and turn the ground — so you know what it actually looks like before you walk it."}, {"id": "offline-map", "start": 41.381, "end": 47.324, "title": "A huge offline map", "body": "A 90 km corridor around the trail, with the road map inside it — so you can always see where you are and how you would get out. Everything on screen is already on the phone: none of it needs a signal."}, {"id": "trail-info", "start": 47.324, "end": 56.008, "title": "Trail information", "body": "Read what this trail asks of you before you start — and see every alternate there is."}, {"id": "alternate", "start": 56.008, "end": 68.884, "title": "Choose an alternate", "body": "Re-route through any alternate and the whole trail adjusts itself around it."}, {"id": "planner", "start": 68.884, "end": 79.233, "title": "Section planner", "body": "Plan your next section or the whole trail, and see what is in it before you walk in — long water carries, bear-can rules, reservations, dangerous crossings, re-routes and closures."}, {"id": "all-trails", "start": 79.233, "end": 91.037, "title": "All major trails — free, for ever", "body": "Hi, I'm Pez! I'm a Thru-Hiker from Switzerland and on all my trails I've dreamt about making this app. An app that is completely hand-tailored to the needs we have on trail.", "image": "img/pez.webp", "imageAlt": "Pez standing on a rock at the edge of a turquoise glacial lake, looking up at a snow-streaked rock wall."}]}
+{"path": "gdt-tour", "durationSeconds": 94.371, "beats": [{"id": "one-screen", "start": 0.001, "end": 11.006, "title": "Everything on one screen.", "body": "The map and the elevation profile stay in sync. The map is a corridor along the trail — up is ahead, down is behind."}, {"id": "your-day", "start": 11.006, "end": 17.225, "title": "Your day", "body": "See your progress towards your destination in the top area."}, {"id": "three-d", "start": 17.225, "end": 34.169, "title": "Look at any place in 3D", "body": "Draw a circle around any place on the trail and turn the ground — so you know what it actually looks like before you walk it."}, {"id": "lock-screen", "start": 34.169, "end": 39.674, "title": "The map on your lock screen", "body": "Switch on the Live Activity and your lock screen carries the ground around you, five kilometres across and turned the way the trail runs — redrawn as you walk, without unlocking the phone."}, {"id": "offline-map", "start": 39.674, "end": 45.566, "title": "A huge offline map", "body": "A 90 km corridor around the trail, with the road map inside it — so you can always see where you are and how you would get out. Everything on screen is already on the phone: none of it needs a signal."}, {"id": "trail-info", "start": 45.566, "end": 55.171, "title": "Trail information", "body": "Read about the trail and every one of its alternates before you start."}, {"id": "alternate", "start": 55.171, "end": 72.771, "title": "Choose an alternate", "body": "Search for any alternate and switch it on — the whole trail adjusts itself around it."}, {"id": "planner", "start": 72.771, "end": 82.97, "title": "Section planner", "body": "Plan your next section or the whole trail, and see what is in it before you walk in — long water carries, bear-can rules, reservations, dangerous crossings, re-routes and closures."}, {"id": "all-trails", "start": 82.971, "end": 94.371, "title": "All major trails — free, for ever", "body": "Hi, I'm Pez! I'm a Thru-Hiker from Switzerland and on all my trails I've dreamt about making this app. An app that is completely hand-tailored to the needs we have on trail.", "image": "img/pez.webp", "imageAlt": "Pez standing on a rock at the edge of a turquoise glacial lake, looking up at a snow-streaked rock wall."}]}
 </script>
 
 <script>
@@ -1065,6 +1106,20 @@
   film.addEventListener('pause', start);
   document.addEventListener('visibilitychange', start);
 
+  // The still comes off when frames are moving and goes back when they have stopped for good.
+  // A pause is given half a second to be undone by the play above — and is ignored while the
+  // tab is hidden — so coming back from another tab is the film carrying on, not a still
+  // flashing up over it for a frame.
+  var screen = document.getElementById('screen');
+  function covered() {
+    setTimeout(function () {
+      if (film.paused && !document.hidden) { screen.classList.remove('running'); }
+    }, 500);
+  }
+  film.addEventListener('playing', function () { screen.classList.add('running'); });
+  film.addEventListener('pause', covered);
+  document.addEventListener('visibilitychange', covered);
+
   // Some browsers refuse a muted, inline `play()` with no gesture behind it at all — Chrome on
   // iOS, and Safari itself in Low Power Mode — so the timer above silently does nothing there.
   // Every gesture on the page is another attempt until one lands. Not `once`: a scroll is not a
@@ -1084,7 +1139,7 @@
      does not accrue evenly, which is the whole reason this is here. Regenerate it with the films
      — see README. -->
 <script id="demo-variants" type="application/json">
-{"dark": {"duration": 91.375, "marks": [0.001, 9.174, 15.433, 41.375, 47.503, 56.102, 69.118, 79.424, 91.374]}, "mosquito": {"duration": 91.139, "marks": [0.001, 9.418, 15.786, 41.646, 47.706, 56.38, 69.471, 79.771, 91.138]}}
+{"dark": {"duration": 94.351, "marks": [0.0, 10.793, 16.998, 33.888, 39.407, 45.289, 54.951, 72.414, 82.547, 94.351]}, "mosquito": {"duration": 94.498, "marks": [0.001, 10.793, 16.984, 33.997, 39.523, 45.457, 55.135, 72.795, 83.137, 94.498]}}
 </script>
 
 <script>
@@ -1185,7 +1240,10 @@
         if (wanted === v.dataset.mode) { show(v.dataset.mode); }
       });
     });
-    v.src = v.dataset.src;
+    // The HEVC take where there is one and this browser plays it, as the main film's <source>
+    // list does; `data-src` is the H.264 one every browser plays.
+    var hevc = v.dataset.srcHevc && v.canPlayType('video/mp4; codecs="hvc1"');
+    v.src = hevc ? v.dataset.srcHevc : v.dataset.src;
     v.load();
     var kick = v.play();
     if (kick && kick.catch) { kick.catch(function () {}); }
@@ -1302,16 +1360,18 @@
 
 <script>
 (function () {
-  // One launch date, read wherever the button is disabled — so the two CTAs (hero and closing)
-  // can never quietly disagree about how many days are left.
-  var launch = new Date(2026, 9, 25);
+  // Each countdown carries its own launch date — the App Store's and Google Play's differ — and
+  // the hero and the closing copies of one store read the same attribute value, so they can never
+  // quietly disagree about how many days are left.
   var today = new Date();
   today.setHours(0, 0, 0, 0);
-  var days = Math.ceil((launch - today) / 86400000);
-  var text = days > 1 ? days + ' days to go'
-    : days === 1 ? '1 day to go'
-    : 'launching today';
-  document.querySelectorAll('.countdown').forEach(function (el) { el.textContent = text; });
+  document.querySelectorAll('.countdown').forEach(function (el) {
+    var p = (el.dataset.launch || '2026-10-25').split('-').map(Number);
+    var days = Math.ceil((new Date(p[0], p[1] - 1, p[2]) - today) / 86400000);
+    el.textContent = days > 1 ? days + ' days to go'
+      : days === 1 ? '1 day to go'
+      : 'launching today';
+  });
 }());
 </script>
 

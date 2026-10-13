@@ -36,11 +36,15 @@
 <p class="back"><a href="./">← Corridor</a></p>
 
 <h1>Privacy Policy</h1>
-<p class="sub">Corridor · last updated 30 September 2026</p>
+<p class="sub">Corridor · last updated 14 October 2026</p>
 
-<p><strong>The app has no account, no sign-in, no analytics, and no server running code I
-wrote.</strong> Almost everything the app knows about you stays on your phone: where you are,
-where you have walked, where you slept, what you have planned. None of it is ever sent anywhere.</p>
+<p><strong>The app has no account, no sign-in, and no server running code I wrote.</strong>
+Almost everything the app knows about you stays on your phone: where you are, where you have
+walked, where you slept, what you have planned. None of that is ever sent anywhere.</p>
+
+<p><strong>The app does count how it is used, anonymously.</strong> Which screens and trails get
+opened and for how long, and which features get tapped &mdash; never where you are, never who you
+are. There is a section on it below, and a switch in Settings that turns it off.</p>
 
 <p><strong>This website is a different thing, and it does count its visitors.</strong> That is new
 as of today and there is a section on it below. Nothing joins the two: the site learns nothing
@@ -48,7 +52,7 @@ about your phone, and the app sends nothing here.</p>
 
 <p><strong>Two things you can choose to share: a comment about a place, and a report on a water
 source.</strong> If you write one, it goes to Apple&rsquo;s iCloud so other hikers can read it. Those
-are the only things this app ever sends, and only when you write one and send it.</p>
+and the anonymous usage counts below are the only things this app ever sends.</p>
 
 <h2>Comments</h2>
 <p>Every waypoint has a place to write a note for the next hiker &mdash; the tank is dry, the
@@ -93,11 +97,35 @@ anything public, and the reason it is said here rather than left for you to work
 <p>If you never write a comment or send a report, nothing about you is stored in iCloud by this app
 at all. Reading what other people wrote sends nothing.</p>
 
+<h2>Usage statistics</h2>
+<p>So I can tell which parts of the app are worth building on, it keeps a tally of how it is
+used and sends it to <a href="https://posthog.com/">PostHog</a>, on servers in the European Union,
+through <code>e.corridor-trails.com</code> &mdash; the same route this website&rsquo;s counts take.</p>
+<p>What is counted: when the app is opened and for how long; which trail is loaded; how that time
+splits between the map, its two modes, the trail pages and Settings; which kinds of place you open
+(a water source, a hut); which map tools you use; whether a map download finished or failed;
+that you posted a comment or a water report, but not what it said; which settings you switch.
+Alongside it: the app&rsquo;s version, the iPhone model, the iOS version and language, and roughly
+which country the request came from, worked out from your IP address, which is not kept beside
+the result.</p>
+<p><strong>One thing is worked out from your location, and only one</strong>: whether you were within
+a kilometre of the trail at the time, as a yes or a no. It is what tells planning a trail at home
+apart from walking it. No coordinate, no distance and no route ever leaves the phone.</p>
+<p>The counts are tied to a random code the app makes when it is first opened. It is not your
+name, your Apple Account, your device&rsquo;s advertising identifier or anything else that could
+be traced back to you, and deleting the app deletes it. Nothing joins it to your comments or to
+this website.</p>
+<p>Without a signal the counts wait on the phone and are sent the next time there is one. To stop
+them, turn off <em>Share anonymous usage</em> in the app&rsquo;s Settings: nothing more is counted
+and anything still waiting is deleted from the phone. Nothing is used for advertising, nothing is
+sold, and nothing is shared with anybody else.</p>
+
 <h2>Your location</h2>
 <p>The app asks for your location so it can show where you are on the trail, measure how far
 you have walked, and warn you about water sources ahead. That location is read on the phone,
 used on the phone, and stored on the phone. It is never transmitted, never logged off the
-device, and never shared with anyone — including me.</p>
+device, and never shared with anyone — including me. The one thing derived from it that does
+leave the phone is the yes-or-no described under <em>Usage statistics</em>.</p>
 <p>You can refuse the permission or withdraw it at any time in iOS Settings. The app still
 works; it simply cannot draw where you are.</p>
 
@@ -114,7 +142,7 @@ works; it simply cannot draw where you are.</p>
 <p>All of it lives inside the app's own storage and is deleted when you delete the app.</p>
 
 <h2>Network use</h2>
-<p>Two things cross the network, to two different places.</p>
+<p>Three things cross the network.</p>
 <ul>
   <li><strong>The map for a trail</strong>, which you choose to download. It comes from a plain
       file bucket on Cloudflare R2 rather than from Apple &mdash; the app asks for a file by name
@@ -124,13 +152,15 @@ works; it simply cannot draw where you are.</p>
   <li><strong>Comments and water reports</strong>, through Apple&rsquo;s CloudKit. Reading them
       sends nothing about you. Writing one sends what is listed under <em>Comments</em> and
       <em>Water reports</em> above.</li>
+  <li><strong>Anonymous usage counts</strong>, to PostHog, as described under <em>Usage
+      statistics</em> above &mdash; unless you turn them off.</li>
 </ul>
 <p>Apple&rsquo;s own handling of iCloud data is covered by
 <a href="https://www.apple.com/legal/privacy/">Apple&rsquo;s privacy policy</a>, and Cloudflare&rsquo;s
 by <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare&rsquo;s</a>.</p>
 
 <h2>This website</h2>
-<p><strong>corridor-trails.com counts its visitors; the app does not.</strong> I write this on my
+<p><strong>corridor-trails.com counts its visitors too.</strong> I write this on my
 own, for hikers, and the only way I can tell whether a page here is doing its job is to look at
 whether anybody reads it.</p>
 <p>The site uses <a href="https://posthog.com/">PostHog</a>, on servers in the European Union, to
@@ -152,9 +182,10 @@ who already hand out the map packs the app downloads.</p>
 it too, and the site works exactly the same either way.</p>
 
 <h2>Third parties</h2>
-<p><strong>In the app there are none.</strong> No advertising, no tracking, no crash reporting, and no
-third-party code that collects or sends anything: the two libraries it is built with draw the map
-and unpack the downloaded one. On this website there is one, and it is PostHog, described above.</p>
+<p><strong>One, in both the app and this website: PostHog</strong>, which receives the anonymous
+counts described above. There is no PostHog code in the app &mdash; the app sends its counts
+itself &mdash; and no advertising, no tracking across other apps or websites, and no crash
+reporting. The two libraries the app is built with draw the map and unpack the downloaded one.</p>
 
 <h2>Children</h2>
 <p>Corridor is rated 4+. It lets hikers write notes other hikers can read, and nothing about
