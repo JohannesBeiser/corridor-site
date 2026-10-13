@@ -216,6 +216,22 @@
      as a dropped frame. The default take carries `on` in the markup, which is what a reader with
      no JavaScript sees — the tabs are hidden from them and this is the film they always had. */
   .phone video.on { opacity:1; }
+  /* **No player, ever.** The film is a picture of the app, not a video somebody operates, so
+     nothing about a browser's player may surface in the bezel: the videos take no pointer, so a
+     right-click or a long press lands on the box rather than on a video menu with *Show
+     controls* and *Pause* in it, and every pseudo-element WebKit and Blink draw their player
+     with is switched off. That includes the start-playback button, which iOS Safari puts over
+     a muted autoplay video it has refused to start — in Low Power Mode it refuses all of them,
+     and the poster under it is what should show until the first touch starts the film. */
+  .phone .screen { -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
+  .phone video { pointer-events:none; }
+  .phone video::-webkit-media-controls,
+  .phone video::-webkit-media-controls-enclosure,
+  .phone video::-webkit-media-controls-panel,
+  .phone video::-webkit-media-controls-overlay-play-button,
+  .phone video::-webkit-media-controls-start-playback-button {
+    display:none !important; -webkit-appearance:none; opacity:0 !important;
+  }
 
   /* ---- the three modes ---- */
   /* Above the phone, in the phone's own column, and no wider than the bezel — a segmented
@@ -766,15 +782,21 @@
              are kept at its time. The variants carry no poster — they are never the first thing
              on screen. -->
         <div class="screen" id="screen">
-          <video id="film" class="on" playsinline muted loop preload="metadata"
+          <video id="film" class="on" playsinline disablepictureinpicture disableremoteplayback
+                 controlslist="nodownload nofullscreen noremoteplayback noplaybackrate"
+                 muted loop preload="metadata"
                  data-mode="default"
                  poster="demo/poster.webp"
                  aria-label="A walk through Corridor on the Great Divide Trail: scrolling the map, opening a campsite, drawing a piece of ground in 3D, taking an alternate and planning a section.">
             <source src="demo/gdt-tour.mp4" type="video/mp4">
           </video>
-          <video class="variant" playsinline muted loop preload="none" data-mode="dark"
+          <video class="variant" playsinline disablepictureinpicture disableremoteplayback
+                 controlslist="nodownload nofullscreen noremoteplayback noplaybackrate"
+                 muted loop preload="none" data-mode="dark"
                  data-src="demo/gdt-tour-dark.mp4" aria-hidden="true" tabindex="-1"></video>
-          <video class="variant" playsinline muted loop preload="none" data-mode="mosquito"
+          <video class="variant" playsinline disablepictureinpicture disableremoteplayback
+                 controlslist="nodownload nofullscreen noremoteplayback noplaybackrate"
+                 muted loop preload="none" data-mode="mosquito"
                  data-src="demo/gdt-tour-mosquito.mp4" aria-hidden="true" tabindex="-1"></video>
         </div>
       </div>
@@ -941,10 +963,8 @@
     var fill = document.createElement('i');
     bar.appendChild(fill);
     t.appendChild(bar);
-    // **Jumping does not change whether it is running.** Somebody who paused to look at a frame
-    // and then picks another beat wants that beat's frame, not playback starting under them —
-    // paused is a mode they chose, and a control that quietly undoes it is a control that has to
-    // be fought. Seeking a paused video still renders the new frame.
+    // A jump is a seek and nothing else. The film is never paused, so there is no state for a
+    // tick to preserve or undo.
     t.addEventListener('click', function () {
       film.currentTime = b.start + 0.05;
       show(i);
@@ -1027,22 +1047,31 @@
   });
 
   // Starts three seconds after the page has loaded, whether or not the phone is on screen yet,
-  // and is never paused again — there is no control left that could stop it, and `loop` on the
-  // element itself carries it round for good.
+  // and `loop` on the element itself carries it round for good.
+  var begun = false;
   function start() {
+    if (!begun || !film.paused || document.hidden) { return; }
     var playing = film.play();
     if (playing && playing.catch) { playing.catch(function () {}); }
   }
-  function schedule() { setTimeout(start, 3000); }
+  function schedule() { setTimeout(function () { begun = true; start(); }, 3000); }
   if (document.readyState === 'complete') { schedule(); } else { window.addEventListener('load', schedule); }
 
-  // Some WKWebView-based browsers on iOS — Chrome among them — refuse even a muted, inline
-  // `play()` call that has no gesture behind it at all, despite the policy that is supposed to
-  // allow it, so the timer above silently does nothing there. The first touch, scroll or click
-  // anywhere on the page is a second attempt; calling play() on a video that is already running
-  // is a harmless no-op, so this costs nothing on browsers where the timer already worked.
-  ['touchstart', 'scroll', 'click'].forEach(function (evt) {
-    window.addEventListener(evt, start, { passive: true, once: true });
+  // **Nothing may stop it, and anything that does is undone.** A browser pauses a muted video
+  // in a background tab and is not obliged to resume it — Chrome on Windows came back from a
+  // TestFlight tab on 2026-10-13 with the clock running in one recording and stopped in
+  // another — so a pause while the page is visible is answered with a play, and so is the page
+  // becoming visible again.
+  film.addEventListener('pause', start);
+  document.addEventListener('visibilitychange', start);
+
+  // Some browsers refuse a muted, inline `play()` with no gesture behind it at all — Chrome on
+  // iOS, and Safari itself in Low Power Mode — so the timer above silently does nothing there.
+  // Every gesture on the page is another attempt until one lands. Not `once`: a scroll is not a
+  // gesture that unlocks media, so spending the listener on one would leave the film stopped,
+  // and `start` returns at once when the film is already running.
+  ['touchend', 'pointerup', 'click', 'keydown', 'scroll'].forEach(function (evt) {
+    window.addEventListener(evt, start, { passive: true });
   });
 }());
 </script>
