@@ -91,8 +91,6 @@
      primary buttons side by side reads as a choice; stacked, it reads as the thing to do now
      and the thing that comes later. */
   .cta.cta-beta { display:flex; width:fit-content; margin:0 auto 1.2rem; }
-  /* The Android button sits under the App Store one with the same launch line beneath it. */
-  .cta.cta-play { margin-top:1.3rem; }
   .cta-note { display:block; margin-top:.85rem; font-size:.86rem; color:var(--faint); }
   .cta:disabled {
     opacity:.45; cursor:not-allowed; box-shadow:none; pointer-events:none;
@@ -759,11 +757,6 @@
       Download on the App Store
     </button>
     <p class="launch-note">Launching October 25, 2026 · <span class="countdown" data-launch="2026-10-25"></span></p>
-    <button type="button" class="cta cta-play" disabled aria-disabled="true">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.2 2.4c-.2.2-.3.6-.3 1v17.2c0 .4.1.8.3 1l9.7-9.6-9.7-9.6zm10.8 8.5 2.9-2.9-10.9-6.3c-.4-.2-.7-.3-1-.2l9 9.4zm0 2.2-9 9.4c.3.1.6 0 1-.2l10.9-6.3-2.9-2.9zm3.9-4.1-3.1 3 3.1 3 3.3-1.9c.9-.5.9-1.7 0-2.2l-3.3-1.9z"/></svg>
-      Get it on Google Play
-    </button>
-    <p class="launch-note">Launching March 2027 · <span class="countdown" data-launch="2027-03-01"></span></p>
 
     <p class="facts">
       <span><b>Offline and free</b></span>
@@ -928,11 +921,6 @@
       Download on the App Store
     </button>
     <p class="launch-note">Launching October 25, 2026 · <span class="countdown" data-launch="2026-10-25"></span></p>
-    <button type="button" class="cta cta-play" disabled aria-disabled="true">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.2 2.4c-.2.2-.3.6-.3 1v17.2c0 .4.1.8.3 1l9.7-9.6-9.7-9.6zm10.8 8.5 2.9-2.9-10.9-6.3c-.4-.2-.7-.3-1-.2l9 9.4zm0 2.2-9 9.4c.3.1.6 0 1-.2l10.9-6.3-2.9-2.9zm3.9-4.1-3.1 3 3.1 3 3.3-1.9c.9-.5.9-1.7 0-2.2l-3.3-1.9z"/></svg>
-      Get it on Google Play
-    </button>
-    <p class="launch-note">Launching March 2027 · <span class="countdown" data-launch="2027-03-01"></span></p>
   </div>
 </section>
 
@@ -1360,8 +1348,7 @@
 
 <script>
 (function () {
-  // Each countdown carries its own launch date — the App Store's and Google Play's differ — and
-  // the hero and the closing copies of one store read the same attribute value, so they can never
+  // Each countdown carries its own launch date — the hero and the closing copies read the same attribute value, so they can never
   // quietly disagree about how many days are left.
   var today = new Date();
   today.setHours(0, 0, 0, 0);
