@@ -3,7 +3,7 @@
 > Corridor is a free offline navigation app for thru-hikers, built by a thru-hiker. The
 > topographic map and the elevation profile sit on one screen and stay in sync; the whole
 > trail is already on the phone before you start walking. iPhone, iOS 18+. No account,
-> no subscription. Launches 25 October 2026; TestFlight beta open now.
+> no subscription. Launches November 2026; TestFlight beta open now.
 
 Site: https://corridor-trails.com/
 Made by: Pez, a thru-hiker from Switzerland.
