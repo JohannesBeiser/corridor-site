@@ -1,0 +1,14 @@
+{
+ "te-araroa": {
+  "line": "te-araroa.line.json",
+  "background": {
+   "coast": "te-araroa.coast.json",
+   "width": 900,
+   "height": 1318,
+   "north": -33.75175,
+   "south": -47.7504,
+   "west": 166.15173,
+   "east": 178.85193
+  }
+ }
+}

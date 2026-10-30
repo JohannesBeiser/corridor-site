@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Follow along</title>
+<meta name="robots" content="noindex">
+<meta name="description" content="Where a hiker on Corridor has got to — the latest night's camp, and nothing before it.">
+<link rel="icon" href="../favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<meta name="theme-color" content="#FBFAF7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#101314" media="(prefers-color-scheme: dark)">
+<style>
+  /* The site's tokens, copied from index.html. `--ahead` is this page's own: the app's `faint`
+     (#9AA0A2 / #6A7072), which the trail still ahead is drawn in — the site's `--faint` is the
+     app's `muted`, a step darker, and is used here for secondary text only. */
+  :root {
+    --paper:#FBFAF7; --card:#FFFFFF; --ink:#1C1F21; --faint:#6B7276; --hair:#DBD8D2;
+    --you:#B0384A; --wash:#F2EFE9;
+    --ahead:#9AA0A2;
+    /* The country: flat land with a hairline coast, the hiker's choice of 2026-10-30. */
+    --land:#ECE8DE; --coast:#B2AA98;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper:#101314; --card:#171B1D; --ink:#E6E8E9; --faint:#9AA1A5; --hair:#2C3235;
+      --you:#D4697A; --wash:#1B2023;
+      --ahead:#6A7072;
+      --land:#2C2F30; --coast:#53585A;
+    }
+  }
+
+  * { box-sizing:border-box; }
+  html { background:var(--paper); -webkit-text-size-adjust:100%; }
+  body {
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:"Avenir Next","Avenir",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-size:17px; line-height:1.5; -webkit-font-smoothing:antialiased;
+  }
+  a { color:var(--you); text-decoration:none; }
+  a:hover { text-decoration:underline; }
+  :focus-visible { outline:2px solid var(--you); outline-offset:3px; border-radius:3px; }
+  [hidden] { display:none !important; }
+  .mono { font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; font-variant-numeric:tabular-nums; }
+
+  main { max-width:30rem; margin:0 auto; padding:2.4rem 16px 1rem; }
+
+  h1 { font-size:1.75rem; line-height:1.15; font-weight:600; letter-spacing:-.02em; margin:0 0 .3rem; text-wrap:balance; }
+  .where { color:var(--faint); font-size:.95rem; margin:0 0 1.6rem; text-wrap:pretty; }
+  .retry { font:inherit; font-size:.95rem; font-weight:600; color:var(--paper); background:var(--ink);
+           border:0; border-radius:999px; padding:.45rem 1.1rem; cursor:pointer; }
+
+  /* ---- the bar: ProgressHeader on the Stats page ---- */
+  .progress-line { display:flex; align-items:baseline; justify-content:space-between; gap:1rem; margin-bottom:6px; }
+  .progress-line .of { font-size:15px; letter-spacing:-.2px; color:var(--faint); }
+  .progress-line .of b { color:var(--ink); font-weight:500; }
+  .progress-line .pct { font-size:12px; color:var(--faint); }
+  .bar { position:relative; height:6px; border-radius:3px; background:var(--hair); overflow:hidden; }
+  .bar span { position:absolute; inset:0 auto 0 0; border-radius:3px; background:var(--you); }
+
+  /* ---- the figures, and the drawing beside them (no map) or above them (a map) ---- */
+  .figure { display:flex; gap:16px; align-items:stretch; margin-top:2rem; }
+  .tiles { flex:1 1 auto; min-width:0; display:flex; flex-direction:column; justify-content:space-between; padding:6px 0; }
+  .tile .cap { font-size:.78rem; color:var(--faint); line-height:1.2; margin-bottom:.15rem; }
+  .tile .val { font-size:1.6rem; line-height:1.1; font-weight:600; letter-spacing:-.02em; white-space:nowrap; }
+  .tile .val small { font-size:.95rem; font-weight:500; color:var(--faint); letter-spacing:0; }
+  .tile .sub { font-size:.82rem; color:var(--faint); margin-top:.1rem; }
+  .figure.with-map { flex-direction:column; gap:1.4rem; margin-top:1.3rem; }
+  .figure.with-map .tiles { flex-direction:row; justify-content:space-between; gap:12px; padding:0; }
+  .figure.with-map .tile .val { font-size:1.3rem; }
+  .figure.with-map .tile .val small { font-size:.8rem; }
+
+  /* The map is one SVG: the coastline path (<slug>.coast.json, smoothed and simplified to about a
+     display pixel by Tools/render_country_flat.py) filled with the land and stroked at 0.5 px
+     whatever the scale, so a fjord coast reads as thin as a smooth one; the trail on top. */
+  .map { position:relative; width:100%; margin:0 0 1.4rem; }
+  .map svg { display:block; width:100%; height:auto; overflow:visible; }
+  svg .coast  { fill:var(--land); stroke:var(--coast); stroke-width:.5px; stroke-linejoin:round; }
+  svg .walked { stroke:var(--ink); }
+  svg .ahead  { stroke:var(--ahead); }
+  svg .casing { stroke:var(--paper); }
+  svg .end    { fill:var(--ink); }
+  svg .dot    { fill:var(--you); }
+  svg .halo   { fill:none; stroke:var(--you); stroke-opacity:.35; stroke-width:1; }
+  .silhouette { flex:0 0 auto; display:block; }
+
+  footer { padding:2rem 16px 3rem; text-align:center; color:var(--faint); font-size:.88rem; }
+  footer a { color:var(--ink); font-weight:600; }
+
+  .mock-flag { position:fixed; top:8px; right:8px; font-size:11px; padding:2px 7px; border-radius:9px;
+               background:var(--wash); color:var(--faint); border:1px solid var(--hair); }
+
+</style>
+</head>
+<body>
+<div class="mock-flag" id="mock-flag" hidden title="This page reads a mocked record, not CloudKit">mock</div>
+
+<main id="gone" hidden>
+  <h1>This link is no longer shared</h1>
+  <p class="where">The hiker has stopped sharing their walk, or the link is not quite right.
+    Ask them for a new one.</p>
+</main>
+
+<main id="error" hidden>
+  <h1>Couldn't load the walk</h1>
+  <p class="where">Something went wrong reaching the page's data. It is probably the connection —
+    try again in a moment.</p>
+  <button class="retry" type="button" onclick="location.reload()">Try again</button>
+</main>
+
+<main id="loading">
+  <p class="where">Loading…</p>
+</main>
+
+<main id="shared" hidden>
+  <h1 id="title">Follow along</h1>
+  <p class="where" id="where"></p>
+
+  <div class="map" id="map" hidden>
+    <svg id="map-line" aria-hidden="true"></svg>
+  </div>
+
+
+
+  <section aria-label="Progress">
+    <div class="progress-line">
+      <span class="of mono" id="of"></span>
+      <span class="pct mono" id="pct"></span>
+    </div>
+    <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="bar"><span id="fill"></span></div>
+  </section>
+
+  <section class="figure" id="figure">
+    <div class="tiles">
+      <div class="tile">
+        <div class="cap">Days on trail</div>
+        <div class="val mono" id="days"></div>
+        <div class="sub" id="since"></div>
+      </div>
+      <div class="tile">
+        <div class="cap">Walked</div>
+        <div class="val mono" id="km"></div>
+        <div class="sub" id="asof"></div>
+      </div>
+      <div class="tile">
+        <div class="cap">Still to walk</div>
+        <div class="val mono" id="left"></div>
+      </div>
+    </div>
+    <svg class="silhouette" id="silhouette" aria-hidden="true" hidden></svg>
+  </section>
+</main>
+
+<footer>
+  Shared from <a href="../">Corridor</a>, the thru-hiking app.
+</footer>
+
+<script>
+/* ======================================================================================
+   CONFIG — the one block to edit when the CloudKit API tokens exist.
+   The record is `TrailShare` in the PUBLIC database of the container below; its recordName is
+   the token after `#`. The environment is production unless the query string says
+   `?env=development` (the query, not the hash, because the hash is the token).
+   ====================================================================================== */
+const CLOUDKIT = {
+  container: "iCloud.com.johannesbeiser.corridor",
+  ENVIRONMENT: "production",
+  API_TOKEN: {
+    // A CloudKit web token is public by design: it is restricted to the corridor-trails.com origin
+    // and can only read what the schema lets the world read (TrailShare: READ _world).
+    production:  "cb15090d4e362bf67b2d5f4d8465171bf2e84e00c9363f2ceb19624a886fb86e",
+    development: "",   // TODO: the development API token
+  },
+  script: "https://cdn.apple-cloudkit.com/ck/2/cloudkit.js",
+};
+
+/* ======================================================================================
+   MOCK RECORDS — `#mock`, `#mock-noname`, `#mock-nobo`, `#mock-new`, `#mock-gone`,
+   `#mock-error`, `#mock-lineonly`. These never load CloudKit and work offline. The shape is exactly what
+   `fetchRecord` makes of a real record: CloudKit's fields, dates as milliseconds.
+   ====================================================================================== */
+const noonUTC = (y, m, d) => Date.UTC(y, m - 1, d, 12);
+const MOCK_RECORD = {
+  trail:      "te-araroa",
+  trailTitle: "Te Araroa",
+  km:         1012.4,           // from the hiker's own start end; km / lengthKm = fraction done
+  lineKm:     1012.4,           // the same camp as chainage from the line's first point
+  lengthKm:   3066.48,
+  direction:  "SOBO",
+  trailName:  "Pez",            // "" when unset
+  firstNight: noonUTC(2026, 9, 2),
+  lastNight:  noonUTC(2026, 10, 28),
+  days:       57,               // computed on the phone, inclusive; displayed as is
+  updatedAt:  Date.UTC(2026, 9, 28, 19, 42),
+};
+const MOCKS = {
+  "mock":        () => ({ ...MOCK_RECORD }),
+  "mock-noname": () => ({ ...MOCK_RECORD, trailName: "" }),
+  "mock-nobo":   () => ({ ...MOCK_RECORD, direction: "NOBO", lineKm: MOCK_RECORD.lengthKm - MOCK_RECORD.km }),
+  "mock-new":    () => ({ ...MOCK_RECORD, km: 0, lineKm: 0, days: 0, firstNight: null, lastNight: null }),
+  "mock-gone":   () => { throw new Gone(); },
+  "mock-error":  () => { throw new Error("mock: a network failure"); },
+  "mock-lineonly": () => ({ ...MOCK_RECORD, noBackground: true }),   // how a trail with no background looks
+};
+
+class Gone extends Error {}
+
+/* ---- the fetch: the only code that knows where a record comes from ---- */
+function loadScript(src) {
+  return new Promise((ok, fail) => {
+    const s = document.createElement("script");
+    s.src = src; s.async = true;
+    s.onload = ok; s.onerror = () => fail(new Error(`could not load ${src}`));
+    document.head.appendChild(s);
+  });
+}
+
+function withTimeout(promise, ms, what) {
+  return Promise.race([promise, new Promise((_, fail) => setTimeout(() => fail(new Error(`${what} timed out`)), ms))]);
+}
+
+let cloudKitReady = null;
+function cloudKitDatabase() {
+  if (!cloudKitReady) cloudKitReady = (async () => {
+    const asked = new URLSearchParams(location.search).get("env");
+    const environment = asked === "development" ? "development" : CLOUDKIT.ENVIRONMENT;
+    const apiToken = CLOUDKIT.API_TOKEN[environment];
+    if (!apiToken) throw new Error(`no CloudKit API token configured for ${environment} (CLOUDKIT.API_TOKEN at the top of the script)`);
+    if (!window.CloudKit) await withTimeout(loadScript(CLOUDKIT.script), 15000, "loading CloudKit JS");
+    CloudKit.configure({
+      containers: [{ containerIdentifier: CLOUDKIT.container, environment,
+                     apiTokenAuth: { apiToken, persist: false } }],
+    });
+    return CloudKit.getDefaultContainer().publicCloudDatabase;
+  })();
+  return cloudKitReady;
+}
+
+const isNotFound = e => e && (e.ckErrorCode === "NOT_FOUND" || e.serverErrorCode === "NOT_FOUND");
+
+/* Resolves to a record, or throws `Gone` (no such record) or any other error (could not load). */
+async function fetchRecord(token) {
+  if (MOCKS[token]) return MOCKS[token]();
+  if (!/^[A-Za-z0-9_-]{8,64}$/.test(token)) throw new Gone();   // nothing that could be a token
+  const db = await cloudKitDatabase();
+  let response;
+  try {
+    response = await withTimeout(db.fetchRecords(token), 15000, "fetching the record");
+  } catch (e) {
+    if (isNotFound(e)) throw new Gone();
+    throw e;
+  }
+  if (response.hasErrors) {
+    const e = response.errors[0];
+    if (isNotFound(e)) throw new Gone();
+    throw e;
+  }
+  const rec = response.records && response.records[0];
+  if (!rec || rec.recordType !== "TrailShare") throw new Gone();
+  const f = rec.fields, v = k => (f[k] ? f[k].value : null);
+  return {
+    trail: v("trail"), trailTitle: v("trailTitle"),
+    km: Number(v("km")) || 0, lineKm: Number(v("lineKm")) || 0, lengthKm: Number(v("lengthKm")) || 0,
+    direction: v("direction"), trailName: v("trailName") || "",
+    firstNight: v("firstNight"), lastNight: v("lastNight"),
+    days: Number(v("days")) || 0, updatedAt: v("updatedAt"),
+  };
+}
+
+/* ---- formatting ---- */
+const NNBSP = " ";
+const fmtKm = km => Math.round(km).toString().replace(/\B(?=(\d{3})+(?!\d))/g, NNBSP);
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+// A night's date, in the viewer's own time zone.
+const fmtDate = (ms, year) => { const d = new Date(ms);
+  return `${d.getDate()} ${MONTHS[d.getMonth()]}${year ? " " + d.getFullYear() : ""}`; };
+
+/* ---- the line ---- */
+const merc = lat => Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360));
+const lineTotal = line => { const s = line.sections[line.sections.length - 1]; return s.points[s.points.length - 1][2]; };
+
+function pointAt(line, km) {
+  for (const s of line.sections) {
+    const p = s.points;
+    if (km < p[0][2] || km > p[p.length - 1][2]) continue;
+    for (let i = 1; i < p.length; i++) if (p[i][2] >= km) {
+      const a = p[i - 1], b = p[i], t = (km - a[2]) / Math.max(1e-9, b[2] - a[2]);
+      return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, km];
+    }
+  }
+  let best = null, d = Infinity;              // in a gap: the nearest section end
+  for (const s of line.sections) for (const q of [s.points[0], s.points[s.points.length - 1]])
+    if (Math.abs(q[2] - km) < d) { d = Math.abs(q[2] - km); best = q; }
+  return best;
+}
+
+/* Which end of the line the hiker started at. `km` counts from their start and `lineKm` from
+   the line's first point, so on a forward walk the two agree and on a reverse walk they sum to
+   the length. Read off the record rather than off the direction's name, which may be NOBO, SOBO,
+   EABO or WEBO and means a different end on every trail. */
+function startsAtLineStart(rec, line) {
+  const total = lineTotal(line);
+  return Math.abs(rec.lineKm - rec.km) <= Math.abs((total - rec.lineKm) - rec.km);
+}
+
+/* Two paths, walked and ahead, with a subpath break only at a real gap or at the cut — the
+   app's `TrailSilhouette`. `P` projects [lat, lon] to the drawing. With no night there is no
+   cut and the whole line is ahead. */
+function trailPaths(line, rec, P) {
+  const started = rec.days > 0 && rec.firstNight != null;
+  const here = started ? rec.lineKm : 0, lowerIsWalked = started && startsAtLineStart(rec, line);
+  const d = { walked: "", ahead: "" };
+  let prev = null;
+  for (const sec of line.sections) {
+    const pts = sec.points, a = pts[0][2], b = pts[pts.length - 1][2];
+    const cut = Math.min(Math.max(here, a), b);
+    const parts = [];
+    if (cut - a > 0.01) parts.push([a, cut, started && lowerIsWalked]);
+    if (b - cut > 0.01) parts.push([cut, b, started && !lowerIsWalked]);
+    parts.forEach(([from, to, walked], n) => {
+      const run = [pointAt(line, from), ...pts.filter(p => p[2] > from && p[2] < to), pointAt(line, to)];
+      const xy = run.map(p => P(p[0], p[1]).map(v => v.toFixed(1)).join(","));
+      const joins = prev === walked && (n > 0 || !sec.gapBefore);
+      d[walked ? "walked" : "ahead"] += (joins ? "L" : "M") + xy.join("L");
+      prev = walked;
+    });
+  }
+  return { ...d, started, here };
+}
+
+function paint(svg, line, rec, P) {
+  const ns = "http://www.w3.org/2000/svg";
+  svg.textContent = "";
+  const el = (name, attrs) => { const e = document.createElementNS(ns, name); for (const k in attrs) e.setAttribute(k, attrs[k]); svg.appendChild(e); return e; };
+  const d = trailPaths(line, rec, P), total = lineTotal(line);
+  // Walked first, so the half in front of the hiker survives an overlap; each on a paper casing.
+  for (const [key, w] of [["walked", 2.0], ["ahead", 1.7]]) {
+    if (!d[key]) continue;
+    const common = { d: d[key], fill: "none", "stroke-linecap": "round", "stroke-linejoin": "round" };
+    el("path", { ...common, class: "casing", "stroke-width": w + 1.6 });
+    el("path", { ...common, class: key, "stroke-width": w });
+  }
+  for (const km of [0, total]) {
+    const [x, y] = P(...pointAt(line, km).slice(0, 2)), r = 3.5;
+    el("path", { class: "end", d: `M${x},${y - r}L${x + r},${y}L${x},${y + r}L${x - r},${y}Z` });
+  }
+  if (!d.started) return;
+  // You: a red dot with a halo — or just the halo round an end you are standing on.
+  const onEnd = [0, total].find(km => Math.abs(km - d.here) < 2);
+  const [x, y] = P(...pointAt(line, onEnd !== undefined ? onEnd : d.here).slice(0, 2));
+  if (onEnd === undefined) el("circle", { class: "dot", cx: x, cy: y, r: 4.6 });
+  el("circle", { class: "halo", cx: x, cy: y, r: onEnd !== undefined ? 9 : 9.5 });
+}
+
+/* ALWAYS NORTH UP — the hiker's rule of 2026-10-30. The app's Stats page turns the line so the
+   walking direction points up; this page does not, with or without a background map, because a
+   friend reading it knows the country north up and an upside-down one is confusing. So a
+   southbounder's walked part fills from the top down and a northbounder's from the bottom up.
+   With a map the line is in the image's own web-mercator, so it sits on the coast; without one
+   it is the same projection fitted to the line's own box. Direction decides only walked/ahead
+   and where the dot is. */
+function drawOnMap(svg, line, rec, bg, width, coast) {
+  const height = width * bg.height / bg.width, mN = merc(bg.north), mS = merc(bg.south);
+  const P = (lat, lon) => [(lon - bg.west) / (bg.east - bg.west) * width, (mN - merc(lat)) / (mN - mS) * height];
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+  svg.setAttribute("width", width); svg.setAttribute("height", height);
+  paint(svg, line, rec, P);
+  // The coast is in the render's own pixels (`coast.width` x `coast.height`, the same box as the
+  // bounds), so it is scaled onto the drawing; the stroke stays 0.5 px however far it is scaled.
+  const e = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  e.setAttribute("class", "coast"); e.setAttribute("d", coast.d);
+  e.setAttribute("vector-effect", "non-scaling-stroke");
+  e.setAttribute("transform", `scale(${width / coast.width} ${height / coast.height})`);
+  svg.insertBefore(e, svg.firstChild);
+}
+
+function drawSilhouette(svg, line, rec, height) {
+  const inset = 10;
+  const proj = (lat, lon) => [lon, -merc(lat) * 180 / Math.PI];      // north up, no rotation
+  let lo = [Infinity, Infinity], hi = [-Infinity, -Infinity];
+  for (const sec of line.sections) for (const p of sec.points) {
+    const [x, y] = proj(p[0], p[1]);
+    lo = [Math.min(lo[0], x), Math.min(lo[1], y)]; hi = [Math.max(hi[0], x), Math.max(hi[1], y)];
+  }
+  const scale = (height - inset * 2) / (hi[1] - lo[1]);
+  const width = Math.ceil((hi[0] - lo[0]) * scale + inset * 2);
+  svg.setAttribute("width", width); svg.setAttribute("height", height);
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+  paint(svg, line, rec, (lat, lon) => { const [x, y] = proj(lat, lon); return [inset + (x - lo[0]) * scale, inset + (y - lo[1]) * scale]; });
+  return width;
+}
+
+/* ---- the page ---- */
+const $ = id => document.getElementById(id);
+function show(id) { for (const m of ["loading", "gone", "error", "shared"]) $(m).hidden = m !== id; }
+
+async function loadJSON(url) { const r = await fetch(url); if (!r.ok) throw new Error(`${url}: ${r.status}`); return r.json(); }
+
+function render(rec, entry, line, coast) {
+  const name = (rec.trailName || "").trim(), title = rec.trailTitle || "";
+  const headline = name ? `Follow ${name}` : "Follow along";
+  $("title").textContent = headline;
+  document.title = title ? `${headline} · ${title}` : headline;
+  $("where").textContent = title;
+
+  const started = rec.days > 0 && rec.firstNight != null;
+  const total = rec.lengthKm, walked = started ? Math.min(total, Math.max(0, rec.km)) : 0;
+  const frac = total > 0 ? walked / total : 0;
+  $("of").innerHTML = `<b>${fmtKm(walked)}${NNBSP}km</b> of ${fmtKm(total)}${NNBSP}km`;
+  $("pct").textContent = `${Math.round(frac * 100)}%`;
+  $("fill").style.width = `${(frac * 100).toFixed(2)}%`;
+  $("fill").style.minWidth = walked > 0 ? "6px" : "0";
+  $("bar").setAttribute("aria-valuenow", Math.round(frac * 100));
+
+  if (started) {
+    $("days").textContent = rec.days;
+    $("since").textContent = `since ${fmtDate(rec.firstNight, true)}`;
+    $("km").innerHTML = `${fmtKm(walked)} <small>km</small>`;
+    $("asof").textContent = rec.lastNight != null ? `as of ${fmtDate(rec.lastNight, false)}` : "";
+  } else {
+    $("days").textContent = "—";
+    $("since").textContent = "not started yet";
+    $("km").innerHTML = `0 <small>km</small>`;
+    $("asof").textContent = "";
+  }
+  $("left").innerHTML = `${fmtKm(total - walked)} <small>km</small>`;
+  show("shared");
+
+  // A trail with a country in trails.json is drawn on it; one without gets the line alone.
+  const bg = (!rec.noBackground && coast && entry && entry.background) || null;
+  const drawFigure = () => {
+    if (!line) return;
+    const map = $("map"), figure = $("figure"), sil = $("silhouette");
+    if (bg) {
+      map.hidden = false; sil.toggleAttribute("hidden", true); figure.classList.add("with-map");
+      drawOnMap($("map-line"), line, rec, bg, map.clientWidth, coast);
+    } else {
+      map.hidden = true; sil.toggleAttribute("hidden", false); figure.classList.remove("with-map");
+      // Half a phone's height, as the Stats page; the width follows, capped at 45% of the column.
+      const col = figure.clientWidth;
+      let h = Math.round(Math.min(Math.max(window.innerHeight / 2, 340), 480));
+      const w = drawSilhouette(sil, line, rec, h);
+      if (w > col * 0.45) drawSilhouette(sil, line, rec, Math.floor(h * (col * 0.45) / w));
+    }
+  };
+  drawFigure();
+  let pending = 0;
+  addEventListener("resize", () => { cancelAnimationFrame(pending); pending = requestAnimationFrame(drawFigure); });
+}
+
+
+(async function () {
+  const token = decodeURIComponent(location.hash.replace(/^#/, "")).trim();
+  $("mock-flag").hidden = !MOCKS[token];
+  let rec;
+  try {
+    if (!token) throw new Gone();
+    rec = await fetchRecord(token);
+  } catch (e) {
+    if (e instanceof Gone) { show("gone"); document.title = "No longer shared"; return; }
+    console.error("follow page: could not load the record —", e && (e.ckErrorCode || e.serverErrorCode) ? `${e.ckErrorCode || e.serverErrorCode}: ${e.reason || e.message || ""}` : e);
+    show("error"); document.title = "Couldn't load"; return;
+  }
+  // The drawing is a nicety: a trail this page has no line for still shows its numbers.
+  let entry = null, line = null, coast = null;
+  try {
+    const manifest = await loadJSON("trails.json");
+    entry = manifest[rec.trail] || null;
+    // A trail with no entry still has its line at the conventional name, drawn on its own.
+    line = await loadJSON((entry && entry.line) || `${rec.trail}.line.json`);
+    const coastFile = entry && entry.background && entry.background.coast;
+    if (coastFile) coast = await loadJSON(coastFile).catch(e => (console.warn("follow page: no coast —", e), null));
+  } catch (e) { console.warn("follow page: no drawing —", e); }
+  render(rec, entry, line, coast);
+})();
+addEventListener("hashchange", () => location.reload());
+</script>
+</body>
+</html>
