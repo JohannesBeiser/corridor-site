@@ -87,7 +87,7 @@
   footer { padding:2rem 16px 3rem; text-align:center; color:var(--faint); font-size:.88rem; }
   footer a { color:var(--ink); font-weight:600; }
 
-  /* ---- the posts: the hiker's photos, one card per trail section, newest section first ----
+  /* ---- the posts: the hiker's own posts from the app, one card each, newest first ----
      Nothing here shows unless the link has an album; `with-posts` on <main> turns the layout on.
      On a phone the posts follow the figures in the same 30rem column; from 60rem the page becomes
      two columns, the walk on the left (sticky, so the map stays while the posts scroll) and the
@@ -98,13 +98,16 @@
   .post { background:var(--card); border:1px solid var(--hair); border-radius:12px; padding:14px; margin:0 0 1.1rem; }
   .post h3 { font-size:1.05rem; line-height:1.25; font-weight:600; letter-spacing:-.01em; margin:0; text-wrap:balance; }
   .post .when { font-size:.82rem; color:var(--faint); margin:.15rem 0 .8rem; }
+  /* The description is text, never HTML; its line breaks are kept. */
+  .post .body { font-size:.95rem; line-height:1.5; margin:-.2rem 0 .9rem; white-space:pre-line;
+                overflow-wrap:anywhere; text-wrap:pretty; }
   /* A justified grid: `layoutGrid` splits the photos into rows near --row high and gives each a
      percentage width from its aspect ratio, so every row is one height, full width, and the cell
      has its final shape before the image arrives (width/height from the record). */
   .grid { --row:118px; display:flex; flex-wrap:wrap; gap:4px; }
   .grid button { flex:0 0 auto; min-width:0; padding:0; border:0; margin:0;
                  background:var(--wash); border-radius:4px; overflow:hidden; cursor:zoom-in; }
-  .grid img { display:block; width:100%; height:auto; aspect-ratio:var(--ar); object-fit:cover; }
+  .grid img { display:block; width:100%; height:auto; object-fit:cover; }
   @media (min-width:60rem) {
     main.with-posts { max-width:72rem; display:grid; grid-template-columns:minmax(0,30rem) minmax(0,36rem);
                       justify-content:center; column-gap:4rem; align-items:start; }
@@ -193,7 +196,7 @@
   </section>
   </div>
 
-  <!-- The hiker's photos, one post per trail section; filled only when the link has an album. -->
+  <!-- The hiker's posts, each a title, a description and photos; filled only when the link has an album. -->
   <section class="posts" id="posts" aria-labelledby="posts-head" hidden>
     <h2 class="posts-head" id="posts-head">Photos</h2>
     <div id="post-list"></div>
@@ -267,31 +270,38 @@ function mockImage(seed, w, h) {
     `<path d="M0 ${h * 0.82} Q${w * 0.4} ${h * (0.62 + (seed % 4) * 0.03)} ${w} ${h * 0.78} V${h} H0Z" fill="${near}"/></svg>`;
   return "data:image/svg+xml," + encodeURIComponent(svg);
 }
-const MOCK_PHOTOS = (() => {
-  // [section, its start km, [day of Oct 2026, width, height], ...] — oldest first, as the album is.
+const MOCK_POSTS = (() => {
+  // [title, body, created (Oct 2026 day, NZ hour), [[photo day, width, height], ...]] — newest
+  // first, as the album is. One post is untitled, so its card is named by its photos' dates.
   const plan = [
-    ["Waikato River",                       776.7, [[3, 1600, 1200], [3, 1200, 1600], [5, 1600, 1067], [6, 1600, 1200]]],
-    ["Hamilton to Te Kūiti",                858.7, [[10, 1600, 1200], [11, 1600, 900], [11, 1200, 1600], [13, 1600, 1200], [15, 1600, 1200]]],
-    ["Pureora Forest and the Timber Trail", 970.7, [[22, 1600, 1067], [23, 1200, 1600], [23, 1600, 1200], [25, 1600, 1200],
-                                                    [26, 1600, 686], [27, 1600, 1200], [28, 1200, 1600]]],
+    ["The Timber Trail",
+     "Two days of old tramlines and swing bridges through the Pureora.\nThe longest bridge is 141 m and it moves.",
+     [28, 19], [[22, 1600, 1067], [23, 1200, 1600], [23, 1600, 1200], [25, 1600, 1200], [26, 1600, 686], [27, 1600, 1200], [28, 1200, 1600]]],
+    ["", "", [16, 8], [[10, 1600, 1200], [11, 1600, 900], [11, 1200, 1600], [13, 1600, 1200], [15, 1600, 1200]]],
+    ["Down the Waikato", "", [6, 21], [[3, 1600, 1200], [3, 1200, 1600], [5, 1600, 1067], [6, 1600, 1200]]],
   ];
   let n = 0;
-  return plan.flatMap(([section, sectionStartKm, shots]) => shots.map(([day, width, height]) => {
-    n++;
-    return { name: `mock-${n}`, url: mockImage(n, width, height), takenOn: nzMidnight(2026, 10, day),
-             section, sectionStartKm, width, height, trail: "te-araroa" };
+  return plan.map(([title, body, [cday, chour], shots], k) => ({
+    name: `mock-post-${k + 1}`, title, body, trail: "te-araroa",
+    createdAt: nzMidnight(2026, 10, cday) + chour * 3600e3,
+    photos: shots.map(([day, width, height]) => {
+      n++;
+      return { name: `mock-photo-${n}`, url: mockImage(n, width, height), takenOn: nzMidnight(2026, 10, day),
+               width, height, trail: "te-araroa" };
+    }),
   }));
 })();
+const MOCK_ONE = [{ ...MOCK_POSTS[0], title: "", body: "", photos: MOCK_POSTS[0].photos.slice(-1) }];
 const MOCKS = {
-  "mock":        () => ({ ...MOCK_RECORD, mockPhotos: MOCK_PHOTOS }),
-  "mock-noname": () => ({ ...MOCK_RECORD, trailName: "", mockPhotos: MOCK_PHOTOS }),
-  "mock-nobo":   () => ({ ...MOCK_RECORD, direction: "NOBO", lineKm: MOCK_RECORD.lengthKm - MOCK_RECORD.km, mockPhotos: MOCK_PHOTOS }),
+  "mock":        () => ({ ...MOCK_RECORD, mockPosts: MOCK_POSTS }),
+  "mock-noname": () => ({ ...MOCK_RECORD, trailName: "", mockPosts: MOCK_POSTS }),
+  "mock-nobo":   () => ({ ...MOCK_RECORD, direction: "NOBO", lineKm: MOCK_RECORD.lengthKm - MOCK_RECORD.km, mockPosts: MOCK_POSTS }),
   "mock-new":    () => ({ ...MOCK_RECORD, km: 0, lineKm: 0, days: 0, firstNight: null, lastNight: null }),
   "mock-gone":   () => { throw new Gone(); },
   "mock-error":  () => { throw new Error("mock: a network failure"); },
-  "mock-lineonly": () => ({ ...MOCK_RECORD, noBackground: true, mockPhotos: MOCK_PHOTOS }),   // how a trail with no background looks
+  "mock-lineonly": () => ({ ...MOCK_RECORD, noBackground: true, mockPosts: MOCK_POSTS }),   // how a trail with no background looks
   "mock-nophotos": () => ({ ...MOCK_RECORD }),                          // a link with no album: the page as it was
-  "mock-onephoto": () => ({ ...MOCK_RECORD, mockPhotos: MOCK_PHOTOS.slice(-1) }),
+  "mock-onephoto": () => ({ ...MOCK_RECORD, mockPosts: MOCK_ONE }),
 };
 
 class Gone extends Error {}
@@ -329,6 +339,10 @@ function cloudKitDatabase() {
 
 const isNotFound = e => e && (e.ckErrorCode === "NOT_FOUND" || e.serverErrorCode === "NOT_FOUND");
 
+const stringList = field => {
+  const list = field && field.value;
+  return Array.isArray(list) ? list.filter(n => typeof n === "string" && n) : [];
+};
 const byName = (list, name) => (list || []).find(x => x && x.recordName === name);
 
 /* Resolves to a record, or throws `Gone` (no such record) or any other error (could not load).
@@ -369,7 +383,7 @@ async function fetchRecord(token) {
     direction: v("direction"), trailName: v("trailName") || "",
     firstNight: v("firstNight"), lastNight: v("lastNight"),
     days: Number(v("days")) || 0, updatedAt: v("updatedAt"),
-    photoNames: [],
+    postNames: [],
   };
   let albumRec = byName(records, album);
   if (!albumRec && apart) {
@@ -382,45 +396,59 @@ async function fetchRecord(token) {
     if (e && !isNotFound(e)) console.warn("follow page: no album —", e);
   }
   if (albumRec && albumRec.recordType === "TrailShareAlbum") {
-    const list = albumRec.fields.photos && albumRec.fields.photos.value;
-    rec.photoNames = Array.isArray(list) ? list.filter(n => typeof n === "string" && n) : [];
+    rec.postNames = stringList(albumRec.fields.posts);
   }
   return rec;
 }
 
-/* The photos the album names, in its order, as plain objects. At most 200 names per call; a
-   name whose record is gone (deleted between album and photo) is skipped. CloudKit's asset
-   download URLs expire after a while: an image that fails to load on a page left open for hours
-   comes back with a reload, which fetches fresh URLs — the page does not refetch on its own. */
-async function fetchPhotos(token, rec) {
-  if (rec.mockPhotos) return rec.mockPhotos;
-  const names = rec.photoNames || [];
-  if (!names.length) return [];
-  const db = await cloudKitDatabase(), found = new Map();
-  const take = r => {
-    if (!r || r.recordType !== "TrailSharePhoto") return;
-    const f = r.fields, v = k => (f[k] ? f[k].value : null), img = v("image");
-    if (!img || !img.downloadURL) return;
-    found.set(r.recordName, {
-      name: r.recordName, url: img.downloadURL, takenOn: v("takenOn"),
-      section: v("section") || "", sectionStartKm: Number(v("sectionStartKm")),
-      width: Number(v("width")) || 0, height: Number(v("height")) || 0, trail: v("trail"), addedAt: v("addedAt"),
-    });
-  };
+/* Records by name, at most 200 per call, as a Map of name to record; a name whose record is gone
+   is simply absent. A rejected batch (one stale name, if CloudKit JS rejects for it) is retried
+   a name at a time, six at once. */
+async function fetchByName(db, names, what) {
+  const found = new Map(), keep = r => { if (r && r.recordName) found.set(r.recordName, r); };
   for (let i = 0; i < names.length; i += 200) {
     const batch = names.slice(i, i + 200);
     try {
-      const r = await withTimeout(db.fetchRecords(batch), 20000, "fetching photos");
-      (r.records || []).forEach(take);
+      const r = await withTimeout(db.fetchRecords(batch), 20000, `fetching ${what}`);
+      (r.records || []).forEach(keep);
     } catch (e) {
-      // A rejected batch (one stale name, if CloudKit JS rejects for it) is retried a name at a time.
-      console.warn("follow page: a batch of photos failed, fetching one by one —", e);
+      console.warn(`follow page: a batch of ${what} failed, fetching one by one —`, e);
       for (let j = 0; j < batch.length; j += 6)
         await Promise.all(batch.slice(j, j + 6).map(n =>
-          db.fetchRecords(n).then(r => (r.records || []).forEach(take), () => {})));
+          db.fetchRecords(n).then(r => (r.records || []).forEach(keep), () => {})));
     }
   }
-  return names.map(n => found.get(n)).filter(Boolean);
+  return found;
+}
+
+/* The album's posts, each with its photos in the post's own order (oldest first), as plain
+   objects: the posts first, then every photo they name, both in batches. A post or photo whose
+   record is gone (deleted between album and fetch) is skipped, and a post left with no photos
+   is dropped. CloudKit's asset download URLs expire after a while: an image that fails to load
+   on a page left open for hours comes back with a reload, which fetches fresh URLs — the page
+   does not refetch on its own. */
+async function fetchPosts(token, rec) {
+  if (rec.mockPosts) return rec.mockPosts;
+  const names = rec.postNames || [];
+  if (!names.length) return [];
+  const db = await cloudKitDatabase();
+  const postRecs = await fetchByName(db, names, "posts");
+  const posts = names.map(n => postRecs.get(n)).filter(r => r && r.recordType === "TrailSharePost").map(r => {
+    const f = r.fields, v = k => (f[k] ? f[k].value : null);
+    return { name: r.recordName, title: v("title") || "", body: v("body") || "", createdAt: v("createdAt"),
+             trail: v("trail"), photoNames: stringList(f.photos) };
+  });
+  const photoRecs = await fetchByName(db, posts.flatMap(p => p.photoNames), "photos");
+  for (const post of posts) {
+    post.photos = post.photoNames.map(n => photoRecs.get(n)).filter(r => r && r.recordType === "TrailSharePhoto").map(r => {
+      const f = r.fields, v = k => (f[k] ? f[k].value : null), img = v("image");
+      return img && img.downloadURL ? {
+        name: r.recordName, url: img.downloadURL, takenOn: v("takenOn"),
+        width: Number(v("width")) || 0, height: Number(v("height")) || 0, trail: v("trail"), addedAt: v("addedAt"),
+      } : null;
+    }).filter(Boolean);
+  }
+  return posts.filter(p => p.photos.length);
 }
 
 /* ---- formatting ---- */
@@ -437,13 +465,15 @@ const fmtDate = (ms, year) => { const d = new Date(ms);
    in the trail's own time zone and rounded to the nearest midnight there: the phone is on the
    trail's clock or within a few hours of it, so the instant lands within an hour or two of a
    midnight on that clock and rounding names the phone's day. A trail not in this table falls back
-   to the viewer's zone, rounded the same way. The result is a whole day as UTC midnight ms. */
+   to the viewer's zone, rounded the same way. The result is a whole day as UTC midnight ms.
+   A post's `createdAt` is an ordinary instant, not a midnight, so it is read on the same clock
+   without the rounding (`round` false). */
 const TRAIL_ZONES = {
   "te-araroa": "Pacific/Auckland", "gdt": "America/Edmonton", "pct": "America/Los_Angeles",
   "azt": "America/Phoenix", "cdt": "America/Denver", "hrp": "Europe/Paris", "at": "America/New_York",
 };
 const zoneParts = {};
-function dayOf(ms, trail) {
+function dayOf(ms, trail, round = true) {
   const zone = TRAIL_ZONES[trail];
   let y, m, d, h;
   if (zone) {
@@ -454,7 +484,7 @@ function dayOf(ms, trail) {
   } else {
     const t = new Date(ms); [y, m, d, h] = [t.getFullYear(), t.getMonth(), t.getDate(), t.getHours()];
   }
-  return Date.UTC(y, m, d + (h >= 12 ? 1 : 0));
+  return Date.UTC(y, m, d + (round && h >= 12 ? 1 : 0));
 }
 // Whole days (UTC midnight ms) to "24 Oct 2026", "22–28 Oct 2026", "28 Sep – 3 Oct 2026",
 // "28 Dec 2026 – 3 Jan 2027".
@@ -648,50 +678,54 @@ function stickStatus() {
 }
 
 /* ---- the posts ---- */
-/* One post per section: photos grouped by `section`, the groups newest first by the newest photo
-   in each, the photos inside a group oldest first (album order breaks a tie). */
-function groupPhotos(photos, trail) {
-  const groups = new Map();
-  photos.forEach((p, i) => {
-    const day = p.takenOn != null ? dayOf(p.takenOn, p.trail || trail) : null;
-    const key = p.section || "";
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key).push({ ...p, day, order: i });
-  });
-  return [...groups].map(([section, list]) => {
-    list.sort((a, b) => ((a.day ?? Infinity) - (b.day ?? Infinity)) || (a.order - b.order));
-    const days = list.map(p => p.day).filter(d => d != null);
-    return { section, photos: list, first: days.length ? Math.min(...days) : null, last: days.length ? Math.max(...days) : null };
-  }).sort((a, b) => (b.last ?? -Infinity) - (a.last ?? -Infinity));
+/* One card per post, newest `createdAt` first whatever order the album gave (the album's order
+   breaks a tie); the photos in the post's own order. An untitled post is named by its photos'
+   dates. */
+function preparePosts(posts, trail) {
+  return posts.map((post, order) => {
+    const t = post.trail || trail;
+    const photos = post.photos.map(p => ({ ...p, day: p.takenOn != null ? dayOf(p.takenOn, p.trail || t) : null }));
+    const days = photos.map(p => p.day).filter(d => d != null);
+    const range = days.length ? fmtDayRange(Math.min(...days), Math.max(...days)) : "";
+    return { ...post, photos, order, label: (post.title || "").trim() || range || "Photos",
+             posted: post.createdAt != null ? dayOf(post.createdAt, t, false) : null };
+  }).sort((a, b) => ((b.createdAt ?? -Infinity) - (a.createdAt ?? -Infinity)) || (a.order - b.order));
 }
 
-function renderPosts(photos, rec) {
-  if (!photos.length) return;
+function renderPosts(posts, rec) {
+  if (!posts.length) return;
   const list = $("post-list");
   list.textContent = "";
-  for (const g of groupPhotos(photos, rec.trail)) {
+  for (const g of preparePosts(posts, rec.trail)) {
     const card = document.createElement("article");
     card.className = "post";
     const h = document.createElement("h3");
-    h.textContent = g.section || "On the trail";
+    h.textContent = g.label;
     card.appendChild(h);
     const when = document.createElement("p");
     when.className = "when";
-    when.textContent = [g.first != null ? fmtDayRange(g.first, g.last) : "",
+    when.textContent = [g.posted != null ? fmtDayRange(g.posted, g.posted) : "",
                         `${g.photos.length} photo${g.photos.length === 1 ? "" : "s"}`].filter(Boolean).join(" · ");
     card.appendChild(when);
+    const body = (g.body || "").trim();
+    if (body) {
+      const p = document.createElement("p");
+      p.className = "body";
+      p.textContent = body;          // text, never HTML
+      card.appendChild(p);
+    }
     const grid = document.createElement("div");
     grid.className = "grid";
     g.photos.forEach((p, i) => {
       const b = document.createElement("button");
       b.type = "button";
       const ar = p.width > 0 && p.height > 0 ? p.width / p.height : 4 / 3;
-      b.style.setProperty("--ar", ar.toFixed(4));
       b.dataset.ar = ar;
       b.setAttribute("aria-label", `Photo ${i + 1} of ${g.photos.length}${p.day != null ? ", " + fmtDayRange(p.day, p.day) : ""}`);
       const img = document.createElement("img");
       img.loading = "lazy"; img.decoding = "async"; img.alt = "";
       if (p.width && p.height) { img.width = p.width; img.height = p.height; }
+      img.style.aspectRatio = ar.toFixed(4);
       img.src = p.url;
       b.appendChild(img);
       b.addEventListener("click", () => openLightbox(g, i, b));
@@ -700,9 +734,9 @@ function renderPosts(photos, rec) {
     card.appendChild(grid);
     list.appendChild(card);
   }
-  layoutGrids();
   $("posts").hidden = false;
   $("shared").classList.add("with-posts");
+  layoutGrids();
   dispatchEvent(new Event("resize"));     // the map's column may have changed width
 }
 
@@ -742,8 +776,9 @@ const lb = { group: null, index: 0, opener: null };
 function showLightboxPhoto() {
   const g = lb.group, p = g.photos[lb.index];
   $("lb-img").src = p.url;
-  $("lb-img").alt = `${g.section || "Photo"}${p.day != null ? ", " + fmtDayRange(p.day, p.day) : ""}`;
-  $("lb-cap").textContent = [g.section, p.day != null ? fmtDayRange(p.day, p.day) : ""].filter(Boolean).join(" · ");
+  const day = p.day != null ? fmtDayRange(p.day, p.day) : "";
+  $("lb-img").alt = [g.label, day !== g.label ? day : ""].filter(Boolean).join(", ");
+  $("lb-cap").textContent = [g.label, day !== g.label ? day : ""].filter(Boolean).join(" · ");
   $("lb-count").textContent = g.photos.length > 1 ? ` ${lb.index + 1} / ${g.photos.length}` : "";
   $("lb-prev").hidden = $("lb-next").hidden = g.photos.length < 2;
   const next = g.photos[(lb.index + 1) % g.photos.length];
@@ -823,7 +858,7 @@ $("lightbox").addEventListener("touchend", e => {
   } catch (e) { console.warn("follow page: no drawing —", e); }
   render(rec, entry, line, coast);
   // The photos come after the walk is on screen, and their failure only leaves the posts out.
-  try { renderPosts(await fetchPhotos(token, rec), rec); }
+  try { renderPosts(await fetchPosts(token, rec), rec); }
   catch (e) { console.warn("follow page: no photos —", e); }
 })();
 addEventListener("hashchange", () => location.reload());
