@@ -87,6 +87,47 @@
   footer { padding:2rem 16px 3rem; text-align:center; color:var(--faint); font-size:.88rem; }
   footer a { color:var(--ink); font-weight:600; }
 
+  /* ---- the posts: the hiker's photos, one card per trail section, newest section first ----
+     Nothing here shows unless the link has an album; `with-posts` on <main> turns the layout on.
+     On a phone the posts follow the figures in the same 30rem column; from 60rem the page becomes
+     two columns, the walk on the left (sticky, so the map stays while the posts scroll) and the
+     posts beside it. */
+  .posts { margin-top:3rem; }
+  .posts-head { font-size:.78rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+                color:var(--faint); margin:0 0 .9rem; }
+  .post { background:var(--card); border:1px solid var(--hair); border-radius:12px; padding:14px; margin:0 0 1.1rem; }
+  .post h3 { font-size:1.05rem; line-height:1.25; font-weight:600; letter-spacing:-.01em; margin:0; text-wrap:balance; }
+  .post .when { font-size:.82rem; color:var(--faint); margin:.15rem 0 .8rem; }
+  /* A justified grid: `layoutGrid` splits the photos into rows near --row high and gives each a
+     percentage width from its aspect ratio, so every row is one height, full width, and the cell
+     has its final shape before the image arrives (width/height from the record). */
+  .grid { --row:118px; display:flex; flex-wrap:wrap; gap:4px; }
+  .grid button { flex:0 0 auto; min-width:0; padding:0; border:0; margin:0;
+                 background:var(--wash); border-radius:4px; overflow:hidden; cursor:zoom-in; }
+  .grid img { display:block; width:100%; height:auto; aspect-ratio:var(--ar); object-fit:cover; }
+  @media (min-width:60rem) {
+    main.with-posts { max-width:72rem; display:grid; grid-template-columns:minmax(0,30rem) minmax(0,36rem);
+                      justify-content:center; column-gap:4rem; align-items:start; }
+    main.with-posts .status { position:sticky; top:var(--stick, 0px); }
+    main.with-posts .posts { margin-top:0; padding-top:.65rem; }
+    .grid { --row:140px; }
+  }
+
+  /* The lightbox is always dark, in the dark theme's own paper and ink: a photo reads best on it. */
+  .lightbox { position:fixed; inset:0; z-index:10; display:flex; align-items:center; justify-content:center;
+              background:rgba(16,19,20,.96); color:#E6E8E9; touch-action:pinch-zoom; }
+  .lightbox figure { margin:0; display:flex; flex-direction:column; align-items:center; }
+  .lightbox img { display:block; max-width:calc(100vw - 32px); max-height:calc(100vh - 120px);
+                  max-height:calc(100dvh - 120px); object-fit:contain; border-radius:2px; background:#171B1D; }
+  .lightbox figcaption { font-size:.85rem; color:#9AA1A5; margin-top:.7rem; padding:0 16px; text-align:center; }
+  .lb-btn { position:absolute; width:48px; height:48px; padding:0; border:0; border-radius:999px; cursor:pointer;
+            background:rgba(16,19,20,.55); color:#E6E8E9; font:inherit; font-size:1.9rem; line-height:1; }
+  .lb-btn:hover { background:rgba(44,50,53,.9); }
+  .lb-close { top:10px; right:10px; font-size:1.25rem; }
+  .lb-prev { left:10px; top:50%; transform:translateY(-50%); }
+  .lb-next { right:10px; top:50%; transform:translateY(-50%); }
+  body.lb-open { overflow:hidden; }
+
   .mock-flag { position:fixed; top:8px; right:8px; font-size:11px; padding:2px 7px; border-radius:9px;
                background:var(--wash); color:var(--faint); border:1px solid var(--hair); }
 
@@ -113,6 +154,7 @@
 </main>
 
 <main id="shared" hidden>
+  <div class="status" id="status">
   <h1 id="title">Follow along</h1>
   <p class="where" id="where"></p>
 
@@ -149,7 +191,24 @@
     </div>
     <svg class="silhouette" id="silhouette" aria-hidden="true" hidden></svg>
   </section>
+  </div>
+
+  <!-- The hiker's photos, one post per trail section; filled only when the link has an album. -->
+  <section class="posts" id="posts" aria-labelledby="posts-head" hidden>
+    <h2 class="posts-head" id="posts-head">Photos</h2>
+    <div id="post-list"></div>
+  </section>
 </main>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo" hidden>
+  <figure>
+    <img id="lb-img" alt="">
+    <figcaption><span id="lb-cap"></span> <span class="mono" id="lb-count"></span></figcaption>
+  </figure>
+  <button type="button" class="lb-btn lb-close" id="lb-close" aria-label="Close">&#x2715;</button>
+  <button type="button" class="lb-btn lb-prev" id="lb-prev" aria-label="Previous photo">&#x2039;</button>
+  <button type="button" class="lb-btn lb-next" id="lb-next" aria-label="Next photo">&#x203A;</button>
+</div>
 
 <footer>
   Shared from <a href="../">Corridor</a>, the thru-hiking app.
@@ -176,7 +235,7 @@ const CLOUDKIT = {
 
 /* ======================================================================================
    MOCK RECORDS — `#mock`, `#mock-noname`, `#mock-nobo`, `#mock-new`, `#mock-gone`,
-   `#mock-error`, `#mock-lineonly`. These never load CloudKit and work offline. The shape is exactly what
+   `#mock-error`, `#mock-lineonly`, `#mock-nophotos`, `#mock-onephoto`. These never load CloudKit and work offline. The shape is exactly what
    `fetchRecord` makes of a real record: CloudKit's fields, dates as milliseconds.
    ====================================================================================== */
 const noonUTC = (y, m, d) => Date.UTC(y, m - 1, d, 12);
@@ -193,14 +252,46 @@ const MOCK_RECORD = {
   days:       57,               // computed on the phone, inclusive; displayed as is
   updatedAt:  Date.UTC(2026, 9, 28, 19, 42),
 };
+/* Mock photos: placeholder landscapes drawn as inline SVG, so the posts work offline. `takenOn`
+   is what the phone writes — the start of the local calendar day, here New Zealand's (NZDT,
+   UTC+13 in October), which is the previous day in UTC and the case the date rounding is for. */
+const nzMidnight = (y, m, d) => Date.UTC(y, m - 1, d) - 13 * 3600e3;
+function mockImage(seed, w, h) {
+  const hue = (seed * 47) % 360, sky = `hsl(${(hue + 190) % 360} 30% 78%)`, sky2 = `hsl(${(hue + 160) % 360} 25% 90%)`;
+  const far = `hsl(${(hue + 120) % 360} 18% 52%)`, near = `hsl(${(hue + 90) % 360} 26% 32%)`;
+  const a = 0.35 + (seed % 5) * 0.06, b = 0.5 + (seed % 3) * 0.08;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}">` +
+    `<defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sky}"/><stop offset="1" stop-color="${sky2}"/></linearGradient></defs>` +
+    `<rect width="${w}" height="${h}" fill="url(#s)"/>` +
+    `<path d="M0 ${h * b} Q${w * 0.25} ${h * a} ${w * 0.5} ${h * (b - 0.04)} T${w} ${h * (a + 0.1)} V${h} H0Z" fill="${far}"/>` +
+    `<path d="M0 ${h * 0.82} Q${w * 0.4} ${h * (0.62 + (seed % 4) * 0.03)} ${w} ${h * 0.78} V${h} H0Z" fill="${near}"/></svg>`;
+  return "data:image/svg+xml," + encodeURIComponent(svg);
+}
+const MOCK_PHOTOS = (() => {
+  // [section, its start km, [day of Oct 2026, width, height], ...] — oldest first, as the album is.
+  const plan = [
+    ["Waikato River",                       776.7, [[3, 1600, 1200], [3, 1200, 1600], [5, 1600, 1067], [6, 1600, 1200]]],
+    ["Hamilton to Te Kūiti",                858.7, [[10, 1600, 1200], [11, 1600, 900], [11, 1200, 1600], [13, 1600, 1200], [15, 1600, 1200]]],
+    ["Pureora Forest and the Timber Trail", 970.7, [[22, 1600, 1067], [23, 1200, 1600], [23, 1600, 1200], [25, 1600, 1200],
+                                                    [26, 1600, 686], [27, 1600, 1200], [28, 1200, 1600]]],
+  ];
+  let n = 0;
+  return plan.flatMap(([section, sectionStartKm, shots]) => shots.map(([day, width, height]) => {
+    n++;
+    return { name: `mock-${n}`, url: mockImage(n, width, height), takenOn: nzMidnight(2026, 10, day),
+             section, sectionStartKm, width, height, trail: "te-araroa" };
+  }));
+})();
 const MOCKS = {
-  "mock":        () => ({ ...MOCK_RECORD }),
-  "mock-noname": () => ({ ...MOCK_RECORD, trailName: "" }),
-  "mock-nobo":   () => ({ ...MOCK_RECORD, direction: "NOBO", lineKm: MOCK_RECORD.lengthKm - MOCK_RECORD.km }),
+  "mock":        () => ({ ...MOCK_RECORD, mockPhotos: MOCK_PHOTOS }),
+  "mock-noname": () => ({ ...MOCK_RECORD, trailName: "", mockPhotos: MOCK_PHOTOS }),
+  "mock-nobo":   () => ({ ...MOCK_RECORD, direction: "NOBO", lineKm: MOCK_RECORD.lengthKm - MOCK_RECORD.km, mockPhotos: MOCK_PHOTOS }),
   "mock-new":    () => ({ ...MOCK_RECORD, km: 0, lineKm: 0, days: 0, firstNight: null, lastNight: null }),
   "mock-gone":   () => { throw new Gone(); },
   "mock-error":  () => { throw new Error("mock: a network failure"); },
-  "mock-lineonly": () => ({ ...MOCK_RECORD, noBackground: true }),   // how a trail with no background looks
+  "mock-lineonly": () => ({ ...MOCK_RECORD, noBackground: true, mockPhotos: MOCK_PHOTOS }),   // how a trail with no background looks
+  "mock-nophotos": () => ({ ...MOCK_RECORD }),                          // a link with no album: the page as it was
+  "mock-onephoto": () => ({ ...MOCK_RECORD, mockPhotos: MOCK_PHOTOS.slice(-1) }),
 };
 
 class Gone extends Error {}
@@ -238,33 +329,98 @@ function cloudKitDatabase() {
 
 const isNotFound = e => e && (e.ckErrorCode === "NOT_FOUND" || e.serverErrorCode === "NOT_FOUND");
 
-/* Resolves to a record, or throws `Gone` (no such record) or any other error (could not load). */
+const byName = (list, name) => (list || []).find(x => x && x.recordName === name);
+
+/* Resolves to a record, or throws `Gone` (no such record) or any other error (could not load).
+   The share and its album (`<token>-album`, a TrailShareAlbum) are asked for in one call; each
+   comes back on its own, a record in `records` or an error in `errors` naming it. A missing
+   album is the normal case — a link with no photos — and never an error. Should CloudKit JS
+   ever reject the whole call over one missing record, the share and the album are fetched apart,
+   which is exactly the single-record fetch this page made before it had photos. */
 async function fetchRecord(token) {
   if (MOCKS[token]) return MOCKS[token]();
   if (!/^[A-Za-z0-9_-]{8,64}$/.test(token)) throw new Gone();   // nothing that could be a token
-  const db = await cloudKitDatabase();
-  let response;
+  const db = await cloudKitDatabase(), album = `${token}-album`;
+  let response, apart = false;
   try {
-    response = await withTimeout(db.fetchRecords(token), 15000, "fetching the record");
+    response = await withTimeout(db.fetchRecords([token, album]), 15000, "fetching the record");
   } catch (e) {
-    if (isNotFound(e)) throw new Gone();
-    throw e;
+    console.warn("follow page: the share and album together failed, fetching them apart —", e);
+    apart = true;
+    try {
+      response = await withTimeout(db.fetchRecords(token), 15000, "fetching the record");
+    } catch (e2) {
+      if (isNotFound(e2)) throw new Gone();
+      throw e2;
+    }
   }
-  if (response.hasErrors) {
-    const e = response.errors[0];
-    if (isNotFound(e)) throw new Gone();
-    throw e;
+  const records = response.records || [], errors = response.errors || [];
+  const share = byName(records, token) || (apart ? records[0] : null);
+  if (!share) {
+    const e = byName(errors, token) || errors.find(x => !x.recordName && !isNotFound(x));
+    if (e && !isNotFound(e)) throw e;
+    throw new Gone();
   }
-  const rec = response.records && response.records[0];
-  if (!rec || rec.recordType !== "TrailShare") throw new Gone();
-  const f = rec.fields, v = k => (f[k] ? f[k].value : null);
-  return {
+  if (share.recordType !== "TrailShare") throw new Gone();
+  const f = share.fields, v = k => (f[k] ? f[k].value : null);
+  const rec = {
     trail: v("trail"), trailTitle: v("trailTitle"),
     km: Number(v("km")) || 0, lineKm: Number(v("lineKm")) || 0, lengthKm: Number(v("lengthKm")) || 0,
     direction: v("direction"), trailName: v("trailName") || "",
     firstNight: v("firstNight"), lastNight: v("lastNight"),
     days: Number(v("days")) || 0, updatedAt: v("updatedAt"),
+    photoNames: [],
   };
+  let albumRec = byName(records, album);
+  if (!albumRec && apart) {
+    try {
+      const r = await withTimeout(db.fetchRecords(album), 15000, "fetching the album");
+      albumRec = byName(r.records, album);
+    } catch (e) { if (!isNotFound(e)) console.warn("follow page: no album —", e); }
+  } else if (!albumRec) {
+    const e = byName(errors, album);
+    if (e && !isNotFound(e)) console.warn("follow page: no album —", e);
+  }
+  if (albumRec && albumRec.recordType === "TrailShareAlbum") {
+    const list = albumRec.fields.photos && albumRec.fields.photos.value;
+    rec.photoNames = Array.isArray(list) ? list.filter(n => typeof n === "string" && n) : [];
+  }
+  return rec;
+}
+
+/* The photos the album names, in its order, as plain objects. At most 200 names per call; a
+   name whose record is gone (deleted between album and photo) is skipped. CloudKit's asset
+   download URLs expire after a while: an image that fails to load on a page left open for hours
+   comes back with a reload, which fetches fresh URLs — the page does not refetch on its own. */
+async function fetchPhotos(token, rec) {
+  if (rec.mockPhotos) return rec.mockPhotos;
+  const names = rec.photoNames || [];
+  if (!names.length) return [];
+  const db = await cloudKitDatabase(), found = new Map();
+  const take = r => {
+    if (!r || r.recordType !== "TrailSharePhoto") return;
+    const f = r.fields, v = k => (f[k] ? f[k].value : null), img = v("image");
+    if (!img || !img.downloadURL) return;
+    found.set(r.recordName, {
+      name: r.recordName, url: img.downloadURL, takenOn: v("takenOn"),
+      section: v("section") || "", sectionStartKm: Number(v("sectionStartKm")),
+      width: Number(v("width")) || 0, height: Number(v("height")) || 0, trail: v("trail"), addedAt: v("addedAt"),
+    });
+  };
+  for (let i = 0; i < names.length; i += 200) {
+    const batch = names.slice(i, i + 200);
+    try {
+      const r = await withTimeout(db.fetchRecords(batch), 20000, "fetching photos");
+      (r.records || []).forEach(take);
+    } catch (e) {
+      // A rejected batch (one stale name, if CloudKit JS rejects for it) is retried a name at a time.
+      console.warn("follow page: a batch of photos failed, fetching one by one —", e);
+      for (let j = 0; j < batch.length; j += 6)
+        await Promise.all(batch.slice(j, j + 6).map(n =>
+          db.fetchRecords(n).then(r => (r.records || []).forEach(take), () => {})));
+    }
+  }
+  return names.map(n => found.get(n)).filter(Boolean);
 }
 
 /* ---- formatting ---- */
@@ -274,6 +430,42 @@ const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov
 // A night's date, in the viewer's own time zone.
 const fmtDate = (ms, year) => { const d = new Date(ms);
   return `${d.getDate()} ${MONTHS[d.getMonth()]}${year ? " " + d.getFullYear() : ""}`; };
+
+/* A photo's day. `takenOn` is the start of a calendar day on the hiker's phone, an instant that
+   lies anywhere from 10:00 UTC the day before (UTC+14) to 12:00 UTC the same day (UTC-12), so no
+   fixed UTC rule and not the viewer's own zone can name the day for everyone. Instead it is read
+   in the trail's own time zone and rounded to the nearest midnight there: the phone is on the
+   trail's clock or within a few hours of it, so the instant lands within an hour or two of a
+   midnight on that clock and rounding names the phone's day. A trail not in this table falls back
+   to the viewer's zone, rounded the same way. The result is a whole day as UTC midnight ms. */
+const TRAIL_ZONES = {
+  "te-araroa": "Pacific/Auckland", "gdt": "America/Edmonton", "pct": "America/Los_Angeles",
+  "azt": "America/Phoenix", "cdt": "America/Denver", "hrp": "Europe/Paris", "at": "America/New_York",
+};
+const zoneParts = {};
+function dayOf(ms, trail) {
+  const zone = TRAIL_ZONES[trail];
+  let y, m, d, h;
+  if (zone) {
+    const fmt = zoneParts[zone] || (zoneParts[zone] = new Intl.DateTimeFormat("en-US",
+      { timeZone: zone, year: "numeric", month: "numeric", day: "numeric", hour: "numeric", hourCycle: "h23" }));
+    const p = Object.fromEntries(fmt.formatToParts(new Date(ms)).map(x => [x.type, x.value]));
+    [y, m, d, h] = [+p.year, +p.month - 1, +p.day, +p.hour];
+  } else {
+    const t = new Date(ms); [y, m, d, h] = [t.getFullYear(), t.getMonth(), t.getDate(), t.getHours()];
+  }
+  return Date.UTC(y, m, d + (h >= 12 ? 1 : 0));
+}
+// Whole days (UTC midnight ms) to "24 Oct 2026", "22–28 Oct 2026", "28 Sep – 3 Oct 2026",
+// "28 Dec 2026 – 3 Jan 2027".
+function fmtDayRange(a, b) {
+  const A = new Date(a), B = new Date(b);
+  const day = (D, withMonth, withYear) => `${D.getUTCDate()}${withMonth ? " " + MONTHS[D.getUTCMonth()] : ""}${withYear ? " " + D.getUTCFullYear() : ""}`;
+  if (a === b) return day(A, true, true);
+  if (A.getUTCFullYear() !== B.getUTCFullYear()) return `${day(A, true, true)} – ${day(B, true, true)}`;
+  if (A.getUTCMonth() !== B.getUTCMonth()) return `${day(A, true, false)} – ${day(B, true, true)}`;
+  return `${day(A, false, false)}–${day(B, true, true)}`;
+}
 
 /* ---- the line ---- */
 const merc = lat => Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360));
@@ -445,8 +637,166 @@ function render(rec, entry, line, coast) {
   };
   drawFigure();
   let pending = 0;
-  addEventListener("resize", () => { cancelAnimationFrame(pending); pending = requestAnimationFrame(drawFigure); });
+  addEventListener("resize", () => { cancelAnimationFrame(pending); pending = requestAnimationFrame(() => { drawFigure(); stickStatus(); layoutGrids(); }); });
 }
+
+/* On a wide page the walk's column is sticky. When it is taller than the window it sticks by its
+   bottom edge instead, so the end of it is never out of reach. */
+function stickStatus() {
+  const status = $("status");
+  status.style.setProperty("--stick", `${Math.min(0, window.innerHeight - status.offsetHeight)}px`);
+}
+
+/* ---- the posts ---- */
+/* One post per section: photos grouped by `section`, the groups newest first by the newest photo
+   in each, the photos inside a group oldest first (album order breaks a tie). */
+function groupPhotos(photos, trail) {
+  const groups = new Map();
+  photos.forEach((p, i) => {
+    const day = p.takenOn != null ? dayOf(p.takenOn, p.trail || trail) : null;
+    const key = p.section || "";
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push({ ...p, day, order: i });
+  });
+  return [...groups].map(([section, list]) => {
+    list.sort((a, b) => ((a.day ?? Infinity) - (b.day ?? Infinity)) || (a.order - b.order));
+    const days = list.map(p => p.day).filter(d => d != null);
+    return { section, photos: list, first: days.length ? Math.min(...days) : null, last: days.length ? Math.max(...days) : null };
+  }).sort((a, b) => (b.last ?? -Infinity) - (a.last ?? -Infinity));
+}
+
+function renderPosts(photos, rec) {
+  if (!photos.length) return;
+  const list = $("post-list");
+  list.textContent = "";
+  for (const g of groupPhotos(photos, rec.trail)) {
+    const card = document.createElement("article");
+    card.className = "post";
+    const h = document.createElement("h3");
+    h.textContent = g.section || "On the trail";
+    card.appendChild(h);
+    const when = document.createElement("p");
+    when.className = "when";
+    when.textContent = [g.first != null ? fmtDayRange(g.first, g.last) : "",
+                        `${g.photos.length} photo${g.photos.length === 1 ? "" : "s"}`].filter(Boolean).join(" · ");
+    card.appendChild(when);
+    const grid = document.createElement("div");
+    grid.className = "grid";
+    g.photos.forEach((p, i) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      const ar = p.width > 0 && p.height > 0 ? p.width / p.height : 4 / 3;
+      b.style.setProperty("--ar", ar.toFixed(4));
+      b.dataset.ar = ar;
+      b.setAttribute("aria-label", `Photo ${i + 1} of ${g.photos.length}${p.day != null ? ", " + fmtDayRange(p.day, p.day) : ""}`);
+      const img = document.createElement("img");
+      img.loading = "lazy"; img.decoding = "async"; img.alt = "";
+      if (p.width && p.height) { img.width = p.width; img.height = p.height; }
+      img.src = p.url;
+      b.appendChild(img);
+      b.addEventListener("click", () => openLightbox(g, i, b));
+      grid.appendChild(b);
+    });
+    card.appendChild(grid);
+    list.appendChild(card);
+  }
+  layoutGrids();
+  $("posts").hidden = false;
+  $("shared").classList.add("with-posts");
+  dispatchEvent(new Event("resize"));     // the map's column may have changed width
+}
+
+/* Rows by width: photos are added to a row until it would come out lower than --row, and the
+   photo that tips it goes on whichever side leaves the row nearer that height. A row's widths
+   are percentages, so it stays justified at any width; only the split is redone on resize. A
+   last row that would come out much taller than --row keeps its photos at --row instead. */
+const GAP = 4;
+function layoutGrid(grid) {
+  const W = grid.clientWidth, target = parseFloat(getComputedStyle(grid).getPropertyValue("--row")) || 120;
+  if (!W) return;
+  const items = [...grid.children], ars = items.map(b => Number(b.dataset.ar) || 4 / 3);
+  const height = (from, to) => (W - GAP * (to - from - 1)) / ars.slice(from, to).reduce((a, b) => a + b, 0);
+  const rows = [];
+  let start = 0;
+  for (let i = 0; i < items.length; i++) {
+    const h = height(start, i + 1);
+    if (h > target) continue;
+    if (i > start && Math.abs(Math.log(height(start, i) / target)) < Math.abs(Math.log(h / target))) {
+      rows.push([start, i]); start = i;
+      if (height(start, i + 1) <= target) { rows.push([start, i + 1]); start = i + 1; }
+    } else { rows.push([start, i + 1]); start = i + 1; }
+  }
+  if (start < items.length) rows.push([start, items.length, true]);
+  for (const [from, to, last] of rows) {
+    const n = to - from, sum = ars.slice(from, to).reduce((a, b) => a + b, 0);
+    for (let i = from; i < to; i++)
+      items[i].style.width = last && height(from, to) > target * 1.25
+        ? `${(ars[i] * target).toFixed(1)}px`
+        : `calc((100% - ${GAP * (n - 1)}px) * ${(ars[i] / sum).toFixed(5)} - 0.05px)`;
+  }
+}
+function layoutGrids() { document.querySelectorAll(".grid").forEach(layoutGrid); }
+
+/* ---- the lightbox: the photos of one post, arrows and swipes between them, Esc to close ---- */
+const lb = { group: null, index: 0, opener: null };
+function showLightboxPhoto() {
+  const g = lb.group, p = g.photos[lb.index];
+  $("lb-img").src = p.url;
+  $("lb-img").alt = `${g.section || "Photo"}${p.day != null ? ", " + fmtDayRange(p.day, p.day) : ""}`;
+  $("lb-cap").textContent = [g.section, p.day != null ? fmtDayRange(p.day, p.day) : ""].filter(Boolean).join(" · ");
+  $("lb-count").textContent = g.photos.length > 1 ? ` ${lb.index + 1} / ${g.photos.length}` : "";
+  $("lb-prev").hidden = $("lb-next").hidden = g.photos.length < 2;
+  const next = g.photos[(lb.index + 1) % g.photos.length];
+  if (next !== p) new Image().src = next.url;
+}
+function openLightbox(group, index, opener) {
+  Object.assign(lb, { group, index, opener });
+  showLightboxPhoto();
+  $("lightbox").hidden = false;
+  document.body.classList.add("lb-open");
+  $("lb-close").focus();
+}
+function closeLightbox() {
+  if ($("lightbox").hidden) return;
+  $("lightbox").hidden = true;
+  document.body.classList.remove("lb-open");
+  $("lb-img").removeAttribute("src");
+  if (lb.opener) lb.opener.focus();
+}
+function stepLightbox(by) {
+  const n = lb.group.photos.length;
+  if (n < 2) return;
+  lb.index = (lb.index + by + n) % n;
+  showLightboxPhoto();
+}
+$("lb-close").addEventListener("click", closeLightbox);
+$("lb-prev").addEventListener("click", () => stepLightbox(-1));
+$("lb-next").addEventListener("click", () => stepLightbox(1));
+$("lightbox").addEventListener("click", e => { if (e.target === e.currentTarget) closeLightbox(); });
+addEventListener("keydown", e => {
+  if ($("lightbox").hidden) return;
+  if (e.key === "Escape") closeLightbox();
+  else if (e.key === "ArrowLeft") stepLightbox(-1);
+  else if (e.key === "ArrowRight") stepLightbox(1);
+  else if (e.key === "Tab") {             // keep focus inside the dialog
+    const f = [...$("lightbox").querySelectorAll("button")].filter(b => !b.hidden);
+    const at = f.indexOf(document.activeElement);
+    e.preventDefault();
+    f[(at + (e.shiftKey ? -1 : 1) + f.length) % f.length].focus();
+  }
+});
+let touchX = null, touchY = null;
+$("lightbox").addEventListener("touchstart", e => {
+  if (e.touches.length !== 1) { touchX = null; return; }
+  touchX = e.touches[0].clientX; touchY = e.touches[0].clientY;
+}, { passive: true });
+$("lightbox").addEventListener("touchend", e => {
+  if (touchX == null) return;
+  const t = e.changedTouches[0], dx = t.clientX - touchX, dy = t.clientY - touchY;
+  touchX = null;
+  if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) stepLightbox(dx < 0 ? 1 : -1);
+  else if (dy > 80 && Math.abs(dy) > Math.abs(dx) * 1.5) closeLightbox();   // a swipe down closes
+});
 
 
 (async function () {
@@ -472,6 +822,9 @@ function render(rec, entry, line, coast) {
     if (coastFile) coast = await loadJSON(coastFile).catch(e => (console.warn("follow page: no coast —", e), null));
   } catch (e) { console.warn("follow page: no drawing —", e); }
   render(rec, entry, line, coast);
+  // The photos come after the walk is on screen, and their failure only leaves the posts out.
+  try { renderPosts(await fetchPhotos(token, rec), rec); }
+  catch (e) { console.warn("follow page: no photos —", e); }
 })();
 addEventListener("hashchange", () => location.reload());
 </script>
