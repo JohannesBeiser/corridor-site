@@ -10,6 +10,16 @@
    "west": 166.15173,
    "east": 178.85193
   },
-  "forward": "SOBO"
+  "forward": "SOBO",
+  "sections": {
+   "North Island": [
+    0,
+    1741.93
+   ],
+   "South Island": [
+    1741.93,
+    3066.48
+   ]
+  }
  }
 }

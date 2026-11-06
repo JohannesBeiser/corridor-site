@@ -298,7 +298,7 @@ const MOCKS = {
   "mock-nobo":   () => ({ ...MOCK_RECORD, direction: "NOBO", lineKm: MOCK_RECORD.lengthKm - MOCK_RECORD.km, mockPosts: MOCK_POSTS }),
   "mock-new":    () => ({ ...MOCK_RECORD, km: 0, lineKm: 0, days: 0, firstNight: null, lastNight: null }),
   // Walking the South Island southbound, 300 km in: the section's own figures and its own country.
-  "mock-south":  () => ({ ...MOCK_RECORD, trailTitle: "Te Araroa · South Island", km: 300, lineKm: 2041.9, lengthKm: 1324.6 }),
+  "mock-south":  () => ({ ...MOCK_RECORD, trailTitle: "Te Araroa · South Island", km: 300, lineKm: 2041.9, lengthKm: 1338.2 }),
   "mock-south-nobo": () => ({ ...MOCK_RECORD, trailTitle: "Te Araroa · South Island", direction: "NOBO", km: 300, lineKm: 2766.5, lengthKm: 1324.6 }),
   "mock-gone":   () => { throw new Gone(); },
   "mock-error":  () => { throw new Error("mock: a network failure"); },
@@ -538,6 +538,16 @@ function startsAtLineStart(rec, line) {
    decides. Null for the entire trail. */
 function walkOf(rec, line, entry) {
   const total = lineTotal(line);
+  // Named first: the title ends `· South Island`, and trails.json gives that section's two ends on
+  // this line. The app's `km` and `lengthKm` are measured on the line the hiker walks, alternates
+  // and all, so they cannot be trusted to find the ends to the kilometre — the name can.
+  const title = rec.trailTitle || "", at = title.lastIndexOf(" · ");
+  if (at < 0) return null;
+  const named = entry && entry.sections && entry.sections[title.slice(at + 3)];
+  if (named) {
+    const forward = entry.forward ? rec.direction === entry.forward : startsAtLineStart(rec, line);
+    return { from: named[0], to: named[1], forward };
+  }
   if (!(rec.lengthKm > 0) || rec.lengthKm >= total - 1) return null;
   const fwd = [rec.lineKm - rec.km, rec.lineKm - rec.km + rec.lengthKm];
   const rev = [rec.lineKm + rec.km - rec.lengthKm, rec.lineKm + rec.km];
@@ -555,7 +565,7 @@ function cropLine(line, from, to) {
   const sections = [];
   for (const s of line.sections) {
     const a = s.points[0][2], b = s.points[s.points.length - 1][2];
-    if (b < from || a > to) continue;
+    if (b <= from + 0.01 || a >= to - 0.01) continue;   // a gap's other bank shares the kilometre
     const inner = s.points.filter(p => p[2] > from && p[2] < to);
     const pts = [...(a < from ? [pointAt(line, from)] : [s.points[0]].filter(p => p[2] >= from)),
                  ...inner.filter(p => p !== s.points[0] && p !== s.points[s.points.length - 1]),
