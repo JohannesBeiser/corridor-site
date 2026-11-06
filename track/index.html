@@ -297,6 +297,9 @@ const MOCKS = {
   "mock-noname": () => ({ ...MOCK_RECORD, trailName: "", mockPosts: MOCK_POSTS }),
   "mock-nobo":   () => ({ ...MOCK_RECORD, direction: "NOBO", lineKm: MOCK_RECORD.lengthKm - MOCK_RECORD.km, mockPosts: MOCK_POSTS }),
   "mock-new":    () => ({ ...MOCK_RECORD, km: 0, lineKm: 0, days: 0, firstNight: null, lastNight: null }),
+  // Walking the South Island southbound, 300 km in: the section's own figures and its own country.
+  "mock-south":  () => ({ ...MOCK_RECORD, trailTitle: "Te Araroa · South Island", km: 300, lineKm: 2041.9, lengthKm: 1324.6 }),
+  "mock-south-nobo": () => ({ ...MOCK_RECORD, trailTitle: "Te Araroa · South Island", direction: "NOBO", km: 300, lineKm: 2766.5, lengthKm: 1324.6 }),
   "mock-gone":   () => { throw new Gone(); },
   "mock-error":  () => { throw new Error("mock: a network failure"); },
   "mock-lineonly": () => ({ ...MOCK_RECORD, noBackground: true, mockPosts: MOCK_POSTS }),   // how a trail with no background looks
@@ -521,8 +524,45 @@ function pointAt(line, km) {
    the length. Read off the record rather than off the direction's name, which may be NOBO, SOBO,
    EABO or WEBO and means a different end on every trail. */
 function startsAtLineStart(rec, line) {
+  if (rec._forward !== undefined) return rec._forward;
   const total = lineTotal(line);
   return Math.abs(rec.lineKm - rec.km) <= Math.abs((total - rec.lineKm) - rec.km);
+}
+
+/* A SECTION — the hiker's ask of 2026-11-06. A hiker walking one section of a trail (Te Araroa's
+   South Island, a PCT state) shares `km` read from the section's own start and `lengthKm` as the
+   section's length, and `lineKm` as chainage as ever — so the numbers above are the section's with
+   no help from here. The section's two ends follow from those three: walking with the line,
+   `lineKm - km` to that plus `lengthKm`; against it, `lineKm + km` back by `lengthKm`. The one
+   that fits on the line wins; where both do, the trail's forward compass word in trails.json
+   decides. Null for the entire trail. */
+function walkOf(rec, line, entry) {
+  const total = lineTotal(line);
+  if (!(rec.lengthKm > 0) || rec.lengthKm >= total - 1) return null;
+  const fwd = [rec.lineKm - rec.km, rec.lineKm - rec.km + rec.lengthKm];
+  const rev = [rec.lineKm + rec.km - rec.lengthKm, rec.lineKm + rec.km];
+  const fits = r => r[0] >= -1 && r[1] <= total + 1;
+  let forward = true;
+  if (fits(fwd) !== fits(rev)) forward = fits(fwd);
+  else if (entry && entry.forward) forward = rec.direction === entry.forward;
+  const [from, to] = forward ? fwd : rev;
+  return { from: Math.max(0, from), to: Math.min(total, to), forward };
+}
+
+/* The line between two kilometres, its ends cut where they fall. Kilometres are kept as they are,
+   so `pointAt` and `lineKm` still mean what they meant. */
+function cropLine(line, from, to) {
+  const sections = [];
+  for (const s of line.sections) {
+    const a = s.points[0][2], b = s.points[s.points.length - 1][2];
+    if (b < from || a > to) continue;
+    const inner = s.points.filter(p => p[2] > from && p[2] < to);
+    const pts = [...(a < from ? [pointAt(line, from)] : [s.points[0]].filter(p => p[2] >= from)),
+                 ...inner.filter(p => p !== s.points[0] && p !== s.points[s.points.length - 1]),
+                 ...(b > to ? [pointAt(line, to)] : [s.points[s.points.length - 1]].filter(p => p[2] <= to))];
+    if (pts.length > 1) sections.push({ ...s, points: pts, gapBefore: sections.length ? s.gapBefore : null });
+  }
+  return { ...line, sections };
 }
 
 /* Two paths, walked and ahead, with a subpath break only at a real gap or at the cut — the
@@ -562,13 +602,14 @@ function paint(svg, line, rec, P) {
     el("path", { ...common, class: "casing", "stroke-width": w + 1.6 });
     el("path", { ...common, class: key, "stroke-width": w });
   }
-  for (const km of [0, total]) {
+  const first = line.sections[0].points[0][2];
+  for (const km of [first, total]) {
     const [x, y] = P(...pointAt(line, km).slice(0, 2)), r = 3.5;
     el("path", { class: "end", d: `M${x},${y - r}L${x + r},${y}L${x},${y + r}L${x - r},${y}Z` });
   }
   if (!d.started) return;
   // You: a red dot with a halo — or just the halo round an end you are standing on.
-  const onEnd = [0, total].find(km => Math.abs(km - d.here) < 2);
+  const onEnd = [first, total].find(km => Math.abs(km - d.here) < 2);
   const [x, y] = P(...pointAt(line, onEnd !== undefined ? onEnd : d.here).slice(0, 2));
   if (onEnd === undefined) el("circle", { class: "dot", cx: x, cy: y, r: 4.6 });
   el("circle", { class: "halo", cx: x, cy: y, r: onEnd !== undefined ? 9 : 9.5 });
@@ -586,7 +627,23 @@ function drawOnMap(svg, line, rec, bg, width, coast) {
   const P = (lat, lon) => [(lon - bg.west) / (bg.east - bg.west) * width, (mN - merc(lat)) / (mN - mS) * height];
   svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
   svg.setAttribute("width", width); svg.setAttribute("height", height);
+  svg.style.overflow = "";
   paint(svg, line, rec, P);
+  // **A section shows its own country** (2026-11-06): the drawing is cropped to the section's box
+  // with a margin, so the South Island fills the frame and the North Island is not on it.
+  if (rec._section) {
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const sec of line.sections) for (const p of sec.points) {
+      const [x, y] = P(p[0], p[1]);
+      x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y);
+    }
+    const pad = Math.max(x1 - x0, y1 - y0) * 0.12;
+    x0 -= pad; y0 -= pad; x1 += pad; y1 += pad;
+    const w = x1 - x0, h = y1 - y0;
+    svg.setAttribute("viewBox", `${x0.toFixed(1)} ${y0.toFixed(1)} ${w.toFixed(1)} ${h.toFixed(1)}`);
+    svg.setAttribute("width", width); svg.setAttribute("height", Math.round(width * h / w));
+    svg.style.overflow = "hidden";
+  }
   // The coast is in the render's own pixels (`coast.width` x `coast.height`, the same box as the
   // bounds), so it is scaled onto the drawing; the stroke stays 0.5 px however far it is scaled.
   const e = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -650,6 +707,9 @@ function render(rec, entry, line, coast) {
 
   // A trail with a country in trails.json is drawn on it; one without gets the line alone.
   const bg = (!rec.noBackground && coast && entry && entry.background) || null;
+  // Walking one section: the line is that section's, and the record knows which end is its start.
+  const walk = line ? walkOf(rec, line, entry) : null;
+  if (walk) { line = cropLine(line, walk.from, walk.to); rec = { ...rec, _forward: walk.forward, _section: true }; }
   const drawFigure = () => {
     if (!line) return;
     const map = $("map"), figure = $("figure"), sil = $("silhouette");
