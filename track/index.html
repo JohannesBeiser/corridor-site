@@ -253,6 +253,7 @@ const MOCK_RECORD = {
   firstNight: noonUTC(2026, 9, 2),
   lastNight:  noonUTC(2026, 10, 28),
   days:       57,               // computed on the phone, inclusive; displayed as is
+  zeros:      5,                // days off among them; absent on older records -> "since <date>"
   updatedAt:  Date.UTC(2026, 9, 28, 19, 42),
 };
 /* Mock photos: placeholder landscapes drawn as inline SVG, so the posts work offline. `takenOn`
@@ -385,7 +386,8 @@ async function fetchRecord(token) {
     km: Number(v("km")) || 0, lineKm: Number(v("lineKm")) || 0, lengthKm: Number(v("lengthKm")) || 0,
     direction: v("direction"), trailName: v("trailName") || "",
     firstNight: v("firstNight"), lastNight: v("lastNight"),
-    days: Number(v("days")) || 0, updatedAt: v("updatedAt"),
+    days: Number(v("days")) || 0, zeros: v("zeros") == null ? null : Number(v("zeros")),
+    updatedAt: v("updatedAt"),
     postNames: [],
   };
   let albumRec = byName(records, album);
@@ -703,7 +705,10 @@ function render(rec, entry, line, coast) {
 
   if (started) {
     $("days").textContent = rec.days;
-    $("since").textContent = `since ${fmtDate(rec.firstNight, true)}`;
+    // Days off under the days (2026-11-08); a record from before the field still says since when.
+    $("since").textContent = rec.zeros != null
+      ? `${rec.zeros} ${rec.zeros === 1 ? "zero" : "zeros"}`
+      : `since ${fmtDate(rec.firstNight, true)}`;
     $("km").innerHTML = `${fmtKm(walked)} <small>km</small>`;
     $("asof").textContent = rec.lastNight != null ? `as of ${fmtDate(rec.lastNight, false)}` : "";
   } else {
