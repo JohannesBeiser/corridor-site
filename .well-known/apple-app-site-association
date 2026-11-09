@@ -8,11 +8,15 @@
                 "components": [
                     {
                         "/": "/place",
-                        "comment": "Matches /place with any query string — trail, lat, lon and an optional key"
+                        "comment": "Matches /place with any query string \u2014 trail, lat, lon and an optional key"
                     },
                     {
                         "/": "/alternate",
                         "comment": "A shared custom alternate: trail, name, km and its taps in the query (AlternateLink in the app)"
+                    },
+                    {
+                        "/": "/follow",
+                        "comment": "A live-location invitation: the iCloud share URL in the fragment (LocationShare.link in the app)"
                     }
                 ]
             }
