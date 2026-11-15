@@ -303,6 +303,9 @@ const MOCKS = {
   "mock-south-nobo": () => ({ ...MOCK_RECORD, trailTitle: "Te Araroa · South Island", direction: "NOBO", km: 300, lineKm: 2766.5, lengthKm: 1324.6 }),
   "mock-gone":   () => { throw new Gone(); },
   "mock-error":  () => { throw new Error("mock: a network failure"); },
+  // Northbound on Te Araroa's Lake Wakatipu Bypass, 40 km round the lake from Queenstown.
+  "mock-alt":    () => ({ ...MOCK_RECORD, direction: "NOBO", km: 375.5, lineKm: 2731.2, lineOn: "8:40",
+                          alternates: "8", lengthKm: 3146.8, mockPosts: MOCK_POSTS }),
   "mock-lineonly": () => ({ ...MOCK_RECORD, noBackground: true, mockPosts: MOCK_POSTS }),   // how a trail with no background looks
   "mock-nophotos": () => ({ ...MOCK_RECORD }),                          // a link with no album: the page as it was
   "mock-onephoto": () => ({ ...MOCK_RECORD, mockPosts: MOCK_ONE }),
@@ -387,6 +390,7 @@ async function fetchRecord(token) {
     direction: v("direction"), trailName: v("trailName") || "",
     firstNight: v("firstNight"), lastNight: v("lastNight"),
     days: Number(v("days")) || 0, zeros: v("zeros") == null ? null : Number(v("zeros")),
+    alternates: v("alternates"), lineOn: v("lineOn"),
     updatedAt: v("updatedAt"),
     postNames: [],
   };
@@ -575,6 +579,73 @@ function cropLine(line, from, to) {
     if (pts.length > 1) sections.push({ ...s, points: pts, gapBefore: sections.length ? s.gapBefore : null });
   }
   return { ...line, sections };
+}
+
+/* THE LINE AS IT IS WALKED — the hiker's ask of 2026-11-15: an alternate switched on in the app is
+   drawn in its own shape, and the trail it replaces is not. The record's `alternates` names them
+   by their row in `<slug>.alternates.json` (written by the app repo's
+   `Tools/export_share_alternates.py`). Kilometres on the spliced line are the walked line's, as
+   the app's are: the trail's up to the first branch, then each alternate's own length in place of
+   what it replaces. Returns the line and the map from a trail chainage to it; a chainage on
+   replaced ground goes to the nearer gate, which is what the app stores for a night out there. */
+function spliceAlternates(line, file, rows) {
+  const alts = rows.map(i => file.alternates.find(a => a.i === i)).filter(Boolean)
+    .sort((a, b) => a.branchKm - b.branchKm);
+  if (!alts.length) return { line, toWalked: t => t, altStart: {} };
+  const total = lineTotal(line), kept = [], altStart = {};
+  let from = line.sections[0].points[0][2];
+  for (const a of alts) { kept.push([from, a.branchKm, a]); from = a.rejoinKm; }
+  kept.push([from, total, null]);
+  const sections = [];
+  let shift = 0, afterAlt = false;
+  const shifts = [];
+  for (const [x, y, alt] of kept) {
+    shifts.push([x, y, shift]);
+    let first = true;
+    for (const s of line.sections) {
+      const a = s.points[0][2], b = s.points[s.points.length - 1][2];
+      if (b <= x + 0.01 || a >= y - 0.01) continue;   // a gap's other bank shares the kilometre
+      const piece = cropLine({ ...line, sections: [s] }, Math.max(x, a), Math.min(y, b)).sections[0];
+      if (!piece) continue;
+      sections.push({ ...piece, gapBefore: first && afterAlt ? null : (first && !sections.length ? null : s.gapBefore),
+                      points: piece.points.map(p => [p[0], p[1], p[2] + shift]) });
+      first = false;
+    }
+    if (!alt) break;
+    const start = alt.branchKm + shift;
+    altStart[alt.i] = start;
+    sections.push({ gapBefore: null, points: alt.points.map(p => [p[0], p[1], start + p[2]]) });
+    shift += alt.lengthKm - (alt.rejoinKm - alt.branchKm);
+    afterAlt = true;
+  }
+  const toWalked = t => {
+    for (const [x, y, sh] of shifts) if (t >= x - 1e-6 && t <= y + 1e-6) return t + sh;
+    for (let k = 0; k + 1 < shifts.length; k++) {                // on replaced ground: nearer gate
+      const [, y, sh] = shifts[k], [x2, , sh2] = shifts[k + 1];
+      if (t > y && t < x2) return t - y <= x2 - t ? y + sh : x2 + sh2;
+    }
+    return t;
+  };
+  return { line: { ...line, sections }, toWalked, altStart };
+}
+
+/* The record on the spliced line: its camp at the walked kilometre (out on an alternate by
+   `lineOn`, `"8:40.0"`, else its chainage moved past every alternate before it), and a section's
+   named ends moved the same way. */
+function walkedRecord(rec, line, entry, file) {
+  const rows = String(rec.alternates || "").split(",").filter(x => x !== "").map(Number);
+  if (!file || !rows.length) return { rec, line, entry };
+  const { line: walkedLine, toWalked, altStart } = spliceAlternates(line, file, rows);
+  let lineKm = toWalked(rec.lineKm);
+  const on = /^(\d+):([\d.]+)$/.exec(rec.lineOn || "");
+  if (on && altStart[Number(on[1])] !== undefined) lineKm = altStart[Number(on[1])] + Number(on[2]);
+  let e = entry;
+  if (entry && entry.sections) {
+    const sections = {};
+    for (const [k, [a, b]] of Object.entries(entry.sections)) sections[k] = [toWalked(a), toWalked(b)];
+    e = { ...entry, sections };
+  }
+  return { rec: { ...rec, lineKm }, line: walkedLine, entry: e };
 }
 
 /* Two paths, walked and ahead, with a subpath break only at a real gap or at the cut — the
@@ -930,6 +1001,12 @@ $("lightbox").addEventListener("touchend", e => {
     line = await loadJSON((entry && entry.line) || `${rec.trail}.line.json`);
     const coastFile = entry && entry.background && entry.background.coast;
     if (coastFile) coast = await loadJSON(coastFile).catch(e => (console.warn("follow page: no coast —", e), null));
+    // The alternates switched on, in their own shape; without the file the trail's line is drawn.
+    if (rec.alternates) {
+      const file = await loadJSON((entry && entry.alternates) || `${rec.trail}.alternates.json`)
+        .catch(e => (console.warn("follow page: no alternates —", e), null));
+      ({ rec, line, entry } = walkedRecord(rec, line, entry, file));
+    }
   } catch (e) { console.warn("follow page: no drawing —", e); }
   render(rec, entry, line, coast);
   // The photos come after the walk is on screen, and their failure only leaves the posts out.
